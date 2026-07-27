@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tracker - All Projects</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:24px}
+body.light{background:#f6f8fa;color:#1f2328}
+body.light .card{background:linear-gradient(135deg,#fff,#f6f8fa);border-color:#d0d7de}
+body.light .card-label{color:#656d76}
+body.light .tab{background:#fff;border-color:#d0d7de;color:#656d76}
+body.light .tab:hover{border-color:#0969da;color:#0969da}
+body.light .tab.active{background:#0969da11;border-color:#0969da;color:#0969da}
+body.light .btn{background:#fff;border-color:#d0d7de;color:#656d76}
+body.light .btn:hover{border-color:#0969da;color:#0969da}
+body.light .btn.active{background:#0969da11;border-color:#0969da;color:#0969da}
+body.light .add-form,body.light .modal-content{background:linear-gradient(135deg,#fff,#f6f8fa);border-color:#d0d7de}
+body.light .form-group input,body.light .form-group select,body.light .form-group textarea{background:#fff;border-color:#d0d7de;color:#1f2328}
+body.light .table-wrap{border-color:#d0d7de}
+body.light th{background:#f6f8fa;color:#656d76}
+body.light td{border-top-color:#d0d7de}
+body.light tr:hover td{background:#f6f8fa88}
+body.light .notes-row td{background:#f6f8fa}
+body.light .notes-textarea{background:#fff;border-color:#d0d7de;color:#1f2328}
+body.light .subtitle,body.light .empty{color:#656d76}
+body.light .progress-container{background:#d0d7de}
+body.light .block-input{background:#fff;border-color:#d0d7de;color:#1f2328}
+input[type="date"]{color-scheme:dark}
+body.light input[type="date"]{color-scheme:light}
+h1{font-size:1.8rem;font-weight:700;background:linear-gradient(135deg,#58a6ff,#a371f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.subtitle{color:#8b949e;margin-bottom:24px;font-size:0.9rem}
+.summary{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.card{background:linear-gradient(135deg,#161b22,#1c2128);border:1px solid #30363d;border-radius:12px;padding:16px 24px;min-width:140px;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.card-value{font-size:2rem;font-weight:700}
+.card-label{font-size:.75rem;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.card.notstarted .card-value{color:#8b949e}
+.card.inprog .card-value{color:#58a6ff}
+.card.blocked .card-value{color:#d29922}
+.card.overdue .card-value{color:#f85149}
+.card.done .card-value{color:#3fb950}
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.tab{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .2s}
+.tab:hover{border-color:#58a6ff;color:#58a6ff}
+.tab.active{background:#58a6ff22;border-color:#58a6ff;color:#58a6ff}
+.controls{display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;transition:all .2s}
+.btn:hover{border-color:#58a6ff;color:#58a6ff}
+.btn.active{background:#58a6ff22;border-color:#58a6ff;color:#58a6ff}
+.btn-add{border-color:#3fb950;color:#3fb950}
+.btn-add:hover{background:#3fb95022}
+.btn-proj{border-color:#a371f7;color:#a371f7;padding:6px 12px}
+.btn-proj:hover{background:#a371f722}
+.add-form{display:none;background:linear-gradient(135deg,#161b22,#1c2128);border:1px solid #30363d;border-radius:12px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.add-form.open{display:block;animation:slideDown .3s ease}
+.add-form::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#58a6ff,#a371f7,#3fb950)}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulseAmber{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.75rem;color:#8b949e;text-transform:uppercase;letter-spacing:1px}
+.form-group input,.form-group select,.form-group textarea{background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:10px 12px;border-radius:8px;font-size:.85rem;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#58a6ff}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-actions{margin-top:16px;display:flex;gap:12px}
+.btn-submit{background:linear-gradient(135deg,#238636,#2ea043);border:none;color:#fff;padding:10px 24px;border-radius:8px;cursor:pointer;font-weight:600;transition:transform .2s}
+.btn-submit:hover{transform:scale(1.02)}
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #30363d}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:#161b22;padding:12px 16px;text-align:left;color:#8b949e;text-transform:uppercase;font-size:.7rem;letter-spacing:1px;cursor:pointer;user-select:none;position:sticky;top:0}
+th:hover{color:#58a6ff}
+th.ns{cursor:default}
+th.ns:hover{color:#8b949e}
+td{padding:12px 16px;border-top:1px solid #21262d;transition:opacity .3s}
+tr:hover td{background:#161b2288}
+tr.done-row td{opacity:.5}
+tr.done-row .task-text{text-decoration:line-through}
+tr.drag-over td{border-top:2px solid #58a6ff}
+.completed-at{display:block;font-size:.65rem;color:#8b949e;margin-top:2px}
+.priority{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
+.priority-high{background:#f85149;box-shadow:0 0 6px #f8514966;animation:pulse 2s infinite}
+.priority-med{background:#d29922}
+.priority-low{background:#484f58}
+.due-warning{color:#d29922;font-weight:600}
+.due-overdue{color:#f85149;font-weight:600}
+.drag-handle{cursor:grab;color:#484f58;font-size:1rem;user-select:none}
+.drag-handle:hover{color:#8b949e}
+.empty{text-align:center;padding:48px;color:#8b949e}
+.project-badge{background:#a371f722;color:#a371f7;padding:2px 8px;border-radius:4px;font-size:.75rem}
+.checkbox{width:18px;height:18px;cursor:pointer;accent-color:#3fb950}
+.notes-row{display:none}
+.notes-row.open{display:table-row;animation:slideDown .2s ease}
+.notes-row td{background:#161b22;padding:8px 16px 16px 60px}
+.notes-textarea{width:100%;background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:10px;border-radius:8px;font-size:.8rem;resize:vertical;min-height:50px}
+.notes-textarea:focus{outline:none;border-color:#58a6ff}
+.expand-btn{background:none;border:none;color:#484f58;cursor:pointer;font-size:.8rem;transition:transform .2s,color .2s}
+.expand-btn:hover{color:#58a6ff}
+.expand-btn.open{transform:rotate(90deg)}
+.edit-btn{background:none;border:none;color:#484f58;cursor:pointer;font-size:.9rem;padding:4px}
+.edit-btn:hover{color:#58a6ff}
+.delete-btn{background:none;border:none;color:#484f58;cursor:pointer;font-size:.9rem;padding:4px}
+.delete-btn:hover{color:#f85149}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-content{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:32px;min-width:320px}
+.modal-content h3{color:#c9d1d9;margin-bottom:16px}
+.progress-container{width:100%;height:6px;background:#21262d;border-radius:3px;margin-top:6px;cursor:pointer;position:relative;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s ease,background .3s ease}
+.progress-fill.not-started{width:0%;background:#484f58}
+.progress-fill.in-progress{width:50%;background:#58a6ff}
+.progress-fill.blocked{width:50%;background:#d29922;animation:pulseAmber 2s infinite}
+.progress-fill.done{width:100%;background:#3fb950}
+.progress-label{font-size:.65rem;color:#8b949e;margin-top:3px}
+.progress-label .stage{font-weight:600}
+.progress-label .stage.not-started{color:#8b949e}
+.progress-label .stage.in-progress{color:#58a6ff}
+.progress-label .stage.blocked{color:#d29922}
+.progress-label .stage.done{color:#3fb950}
+.block-input{background:#0d1117;border:1px solid #d29922;color:#d29922;padding:4px 8px;border-radius:4px;font-size:.7rem;margin-top:3px;width:100%;max-width:250px}
+.block-input:focus{outline:none;border-color:#58a6ff}
+.task-cell{min-width:200px}
+@media(max-width:768px){.summary{flex-direction:column}table{font-size:.75rem}td,th{padding:8px}.form-grid{grid-template-columns:1fr}}
+
+/* Updates Tab Styles */
+.updates-container{display:none;animation:slideDown .3s ease}
+.updates-container.open{display:block}
+.updates-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.updates-filter .filter-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:.8rem;transition:all .2s}
+.updates-filter .filter-btn:hover{border-color:#a371f7;color:#a371f7}
+.updates-filter .filter-btn.active{background:#a371f722;border-color:#a371f7;color:#a371f7}
+.update-form{background:linear-gradient(135deg,#161b22,#1c2128);border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:24px;position:relative;overflow:hidden}
+.update-form::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a371f7,#58a6ff,#3fb950)}
+.update-form .form-grid{display:grid;grid-template-columns:180px 150px 1fr auto;gap:12px;align-items:end}
+.update-form .form-grid textarea{min-height:38px;resize:none}
+@media(max-width:768px){.update-form .form-grid{grid-template-columns:1fr}}
+.timeline{display:flex;flex-direction:column;gap:16px}
+.timeline-group{margin-bottom:24px}
+.timeline-group-header{font-size:1rem;font-weight:700;color:#a371f7;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:8px}
+.timeline-group-header .count-badge{background:#a371f722;color:#a371f7;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.timeline-entry{display:flex;gap:12px;padding:14px 16px;background:#161b22;border:1px solid #30363d;border-radius:10px;border-left:3px solid #a371f7;transition:transform .2s,box-shadow .2s}
+.timeline-entry:hover{transform:translateX(4px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.timeline-entry .entry-date{min-width:90px;font-size:.75rem;color:#58a6ff;font-weight:600;padding-top:2px}
+.timeline-entry .entry-text{flex:1;font-size:.85rem;line-height:1.5;color:#c9d1d9}
+.timeline-entry .entry-delete{background:none;border:none;color:#484f58;cursor:pointer;font-size:.9rem;padding:2px 6px;transition:color .2s}
+.timeline-entry .entry-delete:hover{color:#f85149}
+.timeline-empty{text-align:center;padding:48px;color:#8b949e;font-size:.9rem}
+body.light .update-form{background:linear-gradient(135deg,#fff,#f6f8fa);border-color:#d0d7de}
+body.light .timeline-entry{background:#fff;border-color:#d0d7de;border-left-color:#8250df}
+body.light .timeline-entry:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+body.light .timeline-entry .entry-text{color:#1f2328}
+body.light .timeline-group-header{color:#8250df;border-bottom-color:#d0d7de}
+body.light .timeline-group-header .count-badge{background:#8250df22;color:#8250df}
+body.light .updates-filter .filter-btn{background:#fff;border-color:#d0d7de;color:#656d76}
+body.light .updates-filter .filter-btn:hover{border-color:#8250df;color:#8250df}
+body.light .updates-filter .filter-btn.active{background:#8250df11;border-color:#8250df;color:#8250df}
+</style>
+</head>
+<body>
+<h1>AI Tracker - All Projects</h1>
+<p class="subtitle">Last updated: <span id="lastUpdate"></span></p>
+<div class="summary" id="summary"></div>
+<div class="tabs" id="tabs"><button class="tab active" data-filter="all">All</button><button class="btn btn-proj" id="addProjectBtn">+</button></div>
+<div class="controls">
+  <button class="btn btn-add" id="addBtn">+ Add AI</button>
+  <button class="btn" id="toggleDone">Hide Done</button>
+  <button class="btn" id="toggleSort">Manual Order</button>
+  <button class="btn" id="toggleMine">My AIs</button>
+  <button class="btn" id="undoBtn" style="border-color:#f85149;color:#f85149">Undo</button>
+  <button class="btn" id="redoBtn" style="border-color:#58a6ff;color:#58a6ff">Redo</button>
+  <button class="btn" id="toggleTheme">Light Mode</button>
+</div>
+<div class="add-form" id="addForm">
+  <div class="form-grid">
+    <div class="form-group"><label>Project</label><select id="f-project"></select></div>
+    <div class="form-group"><label>Task</label><input type="text" id="f-task" placeholder="What needs to be done?"></div>
+    <div class="form-group"><label>Owner</label><input type="text" id="f-owner" value="MB"></div>
+    <div class="form-group"><label>Due Date</label><input type="date" id="f-due"></div>
+    <div class="form-group"><label>Priority</label><select id="f-priority"><option value="Med">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div>
+    <div class="form-group"><label>Source</label><input type="text" id="f-source" placeholder="Meeting, email, etc."></div>
+  </div>
+  <div class="form-group" style="margin-top:12px"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Additional details..."></textarea></div>
+  <div class="form-actions"><button class="btn-submit" id="submitBtn">Add Action Item</button></div>
+</div>
+<div class="modal-overlay" id="projectModal">
+  <div class="modal-content">
+    <h3>Add New Project</h3>
+    <div class="form-group"><label>Project Name</label><input type="text" id="new-project-name" placeholder="e.g. QP40 LT9999"></div>
+    <div style="margin-top:16px;display:flex;gap:12px">
+      <button class="btn-submit" id="submitProject">Create</button>
+      <button class="btn" id="cancelProject">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="editModal">
+  <div class="modal-content" style="min-width:400px">
+    <h3>Edit Task</h3>
+    <input type="hidden" id="edit-id">
+    <div class="form-grid">
+      <div class="form-group"><label>Project</label><select id="edit-project"></select></div>
+      <div class="form-group"><label>Task</label><input type="text" id="edit-task"></div>
+      <div class="form-group"><label>Owner</label><input type="text" id="edit-owner"></div>
+      <div class="form-group"><label>Due Date</label><input type="date" id="edit-due"></div>
+      <div class="form-group"><label>Priority</label><select id="edit-priority"><option value="High">High</option><option value="Med">Medium</option><option value="Low">Low</option></select></div>
+      <div class="form-group"><label>Source</label><input type="text" id="edit-source"></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:12px">
+      <button class="btn-submit" id="saveEdit">Save</button>
+      <button class="btn" id="cancelEdit">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th class="ns"></th><th class="ns"></th><th class="ns"></th><th data-sort="id">#</th><th data-sort="project">Project</th><th data-sort="task">Task / Progress</th><th data-sort="owner">Owner</th><th data-sort="dueDate">Due</th><th data-sort="source">Source</th><th class="ns"></th></tr></thead>
+<tbody id="tbody"></tbody>
+</table></div>
+<div class="empty" id="empty" style="display:none">No action items found.</div>
+<div class="updates-container" id="updatesContainer">
+  <div class="update-form">
+    <div class="form-grid">
+      <div class="form-group"><label>Project</label><select id="upd-project"></select></div>
+      <div class="form-group"><label>Date</label><input type="date" id="upd-date"></div>
+      <div class="form-group"><label>Update</label><textarea id="upd-text" placeholder="What happened? Status change, decision, milestone..." style="min-height:38px"></textarea></div>
+      <div><button class="btn-submit" id="submitUpdate" style="padding:10px 20px">Add</button></div>
+    </div>
+  </div>
+  <div class="updates-filter" id="updatesFilter"></div>
+  <div class="timeline" id="timeline"></div>
+</div>
+<script>
+var EMBEDDED_ITEMS = [
+  {
+    "id": 1,
+    "project": "QP34",
+    "task": "ESD/LU form submission",
+    "owner": "MB",
+    "dueDate": "2026-07-25",
+    "status": "Open",
+    "source": "Meeting",
+    "dateAdded": "2026-07-17",
+    "notes": "",
+    "priority": "Med",
+    "progress": "not-started",
+    "blockReason": "",
+    "completedAt": null,
+    "sortOrder": 0
+  },
+  {
+    "id": 1784890235,
+    "project": "LT7171",
+    "task": "New tapeout date and RTS schedule?",
+    "owner": "MB",
+    "dueDate": "2026-07-31",
+    "status": "Open",
+    "source": "HPP PE Team Weekly 07-21",
+    "dateAdded": "2026-07-24",
+    "notes": "",
+    "priority": "Med",
+    "progress": "not-started",
+    "blockReason": "",
+    "completedAt": null,
+    "sortOrder": 1
+  },
+  {
+    "id": 1784890236,
+    "project": "LT3013",
+    "task": "LU Customer Request - share progress with Rel due to long CT on post test (issue of setup at LTX)",
+    "owner": "MB",
+    "dueDate": "2026-07-23",
+    "status": "Open",
+    "source": "HPP AECQ Bi Weekly 07-16",
+    "dateAdded": "2026-07-24",
+    "notes": "",
+    "priority": "High",
+    "progress": "not-started",
+    "blockReason": "",
+    "completedAt": null,
+    "sortOrder": 2
+  },
+  {
+    "id": 1784890237,
+    "project": "LT8460",
+    "task": "Check DFMEA if available; and APR requirements (if needed)",
+    "owner": "MB",
+    "dueDate": "2026-07-30",
+    "status": "Open",
+    "source": "HPP AECQ Bi Weekly 07-16",
+    "dateAdded": "2026-07-24",
+    "notes": "",
+    "priority": "Med",
+    "progress": "not-started",
+    "blockReason": "",
+    "completedAt": null,
+    "sortOrder": 3
+  }
+];
+var EMBEDDED_VERSION = 1784959518;
+var DEFAULT_PROJECTS = ["QP20", "QP17", "QP15", "LT7171", "QP34", "Sustaining", "LT8460", "LT3013"];
+var STORAGE_KEY = "ai_tracker_v2";
+var PROJECTS_KEY = "ai_tracker_projects";
+var THEME_KEY = "ai_tracker_theme";
+var STAGES = ["not-started","in-progress","blocked","done"];
+var STAGE_LABELS = {"not-started":"Not Started","in-progress":"In Progress","blocked":"Blocked","done":"Done"};
+
+var EMBEDDED_UPDATES = [];
+var UPDATES_KEY = "ai_tracker_updates";
+var updates = [];
+var updatesFilter = "all";
+
+function loadUpdates(){
+  var stored=localStorage.getItem(UPDATES_KEY);
+  if(stored){
+    var saved=JSON.parse(stored);
+    var ver=parseInt(localStorage.getItem(UPDATES_KEY+"_ver"))||0;
+    if(EMBEDDED_VERSION>ver){
+      var ids=saved.map(function(s){return s.id});
+      EMBEDDED_UPDATES.forEach(function(eu){if(ids.indexOf(eu.id)===-1)saved.push(JSON.parse(JSON.stringify(eu)))});
+      localStorage.setItem(UPDATES_KEY,JSON.stringify(saved));
+      localStorage.setItem(UPDATES_KEY+"_ver",String(EMBEDDED_VERSION));
+    }
+    return saved;
+  }
+  var res=EMBEDDED_UPDATES.map(function(u){return JSON.parse(JSON.stringify(u))});
+  localStorage.setItem(UPDATES_KEY,JSON.stringify(res));
+  localStorage.setItem(UPDATES_KEY+"_ver",String(EMBEDDED_VERSION));
+  return res;
+}
+function saveUpdates(){localStorage.setItem(UPDATES_KEY,JSON.stringify(updates));localStorage.setItem(UPDATES_KEY+"_ver",String(EMBEDDED_VERSION))}
+function addUpdate(){
+  var proj=document.getElementById("upd-project").value;
+  var date=document.getElementById("upd-date").value;
+  var text=document.getElementById("upd-text").value.trim();
+  if(!text){alert("Update text is required");return}
+  if(!date)date=new Date().toISOString().split("T")[0];
+  updates.push({id:Date.now(),project:proj,date:date,text:text});
+  saveUpdates();
+  document.getElementById("upd-text").value="";
+  renderUpdates();
+}
+function deleteUpdate(id){
+  if(!confirm("Delete this update?"))return;
+  updates=updates.filter(function(u){return u.id!==id});
+  saveUpdates();renderUpdates();
+}
+function renderUpdates(){
+  var filtered=updatesFilter==="all"?updates:updates.filter(function(u){return u.project===updatesFilter});
+  filtered.sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id});
+  // Group by project
+  var groups={};
+  filtered.forEach(function(u){if(!groups[u.project])groups[u.project]=[];groups[u.project].push(u)});
+  // Build filter buttons
+  var filterHtml='<button class="filter-btn'+(updatesFilter==="all"?" active":"")+'" data-uf="all">All</button>';
+  projects.forEach(function(p){
+    var ct=updates.filter(function(u){return u.project===p}).length;
+    if(ct>0)filterHtml+='<button class="filter-btn'+(updatesFilter===p?" active":"")+'" data-uf="'+p+'">'+p+' ('+ct+')</button>';
+  });
+  document.getElementById("updatesFilter").innerHTML=filterHtml;
+  // Bind filter clicks
+  document.querySelectorAll("[data-uf]").forEach(function(btn){
+    btn.addEventListener("click",function(){updatesFilter=btn.dataset.uf;renderUpdates()});
+  });
+  // Build timeline
+  var html="";
+  var projKeys=Object.keys(groups);
+  if(!projKeys.length){html='<div class="timeline-empty">No updates yet. Add your first project update above.</div>'}
+  else{
+    projKeys.forEach(function(proj){
+      html+='<div class="timeline-group"><div class="timeline-group-header">'+proj+' <span class="count-badge">'+groups[proj].length+' update'+(groups[proj].length>1?"s":"")+'</span></div>';
+      groups[proj].forEach(function(u){
+        var escapedText=u.text.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+        html+='<div class="timeline-entry"><div class="entry-date">'+u.date+'</div><div class="entry-text">'+escapedText+'</div><button class="entry-delete" onclick="deleteUpdate('+u.id+')" title="Delete">&times;</button></div>';
+      });
+      html+='</div>';
+    });
+  }
+  document.getElementById("timeline").innerHTML=html;
+  // Populate update form project dropdown
+  var sel=document.getElementById("upd-project");sel.innerHTML="";
+  projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;sel.appendChild(o)});
+}
+function showUpdatesView(){
+  document.querySelector(".table-wrap").style.display="none";
+  document.querySelector(".add-form").classList.remove("open");
+  document.getElementById("empty").style.display="none";
+  document.querySelector(".summary").style.display="none";
+  document.querySelector(".controls").style.display="none";
+  document.getElementById("updatesContainer").classList.add("open");
+  document.getElementById("upd-date").value=new Date().toISOString().split("T")[0];
+  renderUpdates();
+}
+function hideUpdatesView(){
+  document.querySelector(".table-wrap").style.display="";
+  document.querySelector(".summary").style.display="";
+  document.querySelector(".controls").style.display="";
+  document.getElementById("updatesContainer").classList.remove("open");
+}
+var MY_NAMES = ["mb","mark","lester","mark lester"];
+var undoStack = [], redoStack = [], MAX_UNDO = 20;
+var hideDone = false, manualSort = false, showMineOnly = false;
+var currentFilter = "all", sortCol = "dueDate", sortAsc = true, dragId = null;
+var items = [], projects = [];
+
+function applyTheme(t){document.body.classList.toggle("light",t==="light");document.getElementById("toggleTheme").textContent=t==="light"?"Dark Mode":"Light Mode"}
+applyTheme(localStorage.getItem(THEME_KEY)||"dark");
+
+function migrateItem(item){
+  if(!item.progress){if(item.status==="Done")item.progress="done";else if(item.status==="In Progress")item.progress="in-progress";else item.progress="not-started"}
+  if(!item.blockReason)item.blockReason="";
+  if(!item.priority)item.priority="Med";
+  if(!item.notes)item.notes="";
+  if(!item.completedAt)item.completedAt=null;
+  if(item.sortOrder===undefined)item.sortOrder=0;
+  if(item.project==="LT8460 Die Rev")item.project="LT8460";
+  return item;
+}
+function loadProjects(){
+  var s=localStorage.getItem(PROJECTS_KEY);
+  if(s){var arr=JSON.parse(s);return arr.filter(function(p,i){return arr.indexOf(p)===i&&p!=="asd"&&p!=="LT8460 Die Rev"})}
+  return DEFAULT_PROJECTS.slice();
+}
+function saveProjectsList(){localStorage.setItem(PROJECTS_KEY,JSON.stringify(projects))}
+function loadItems(){
+  var stored=localStorage.getItem(STORAGE_KEY);
+  if(stored){
+    var saved=JSON.parse(stored).map(migrateItem);
+    var ver=parseInt(localStorage.getItem(STORAGE_KEY+"_ver"))||0;
+    if(EMBEDDED_VERSION>ver){
+      var ids=saved.map(function(s){return s.id});
+      EMBEDDED_ITEMS.forEach(function(ei){if(ids.indexOf(ei.id)===-1)saved.push(migrateItem(JSON.parse(JSON.stringify(ei))))});
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(saved));
+      localStorage.setItem(STORAGE_KEY+"_ver",String(EMBEDDED_VERSION));
+    }
+    return saved;
+  }
+  var res=EMBEDDED_ITEMS.map(function(item){return migrateItem(JSON.parse(JSON.stringify(item)))});
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(res));
+  localStorage.setItem(STORAGE_KEY+"_ver",String(EMBEDDED_VERSION));
+  return res;
+}
+function saveItems(){localStorage.setItem(STORAGE_KEY,JSON.stringify(items));localStorage.setItem(STORAGE_KEY+"_ver",String(EMBEDDED_VERSION))}
+function pushUndo(){undoStack.push(JSON.stringify(items));if(undoStack.length>MAX_UNDO)undoStack.shift();redoStack=[]}
+function getStatus(item){
+  if(item.progress==="done")return"done";
+  if(item.progress==="blocked")return"blocked";
+  if(item.dueDate&&new Date(item.dueDate)<new Date()&&item.progress!=="done")return"overdue";
+  if(item.progress==="in-progress")return"in-progress";
+  return"not-started";
+}
+function getDueClass(item){
+  if(!item.dueDate||item.progress==="done")return"";
+  var diff=(new Date(item.dueDate)-new Date())/(1000*60*60*24);
+  if(diff<0)return"due-overdue";if(diff<=3)return"due-warning";return"";
+}
+function cycleProgress(id){
+  pushUndo();
+  var item=items.find(function(i){return i.id===id});if(!item)return;
+  var idx=STAGES.indexOf(item.progress);
+  item.progress=STAGES[(idx+1)%STAGES.length];
+  if(item.progress==="done"){item.completedAt=new Date().toISOString()}else{item.completedAt=null}
+  if(item.progress!=="blocked")item.blockReason="";
+  saveItems();render();
+  if(item.progress==="blocked")setTimeout(function(){var el=document.getElementById("block-input-"+id);if(el)el.focus()},100);
+}
+function toggleItem(id){
+  pushUndo();
+  var item=items.find(function(i){return i.id===id});if(!item)return;
+  if(item.progress==="done"){item.progress="in-progress";item.completedAt=null}
+  else{item.progress="done";item.completedAt=new Date().toISOString()}
+  item.blockReason="";saveItems();render();
+}
+function deleteItem(id){
+  if(!confirm("Delete this AI?"))return;
+  pushUndo();items=items.filter(function(i){return i.id!==id});saveItems();render();
+}
+function toggleNotes(id){
+  var row=document.getElementById("notes-"+id);var btn=document.getElementById("exp-"+id);
+  if(row){row.classList.toggle("open");btn.classList.toggle("open")}
+}
+function editItem(id){
+  var item=items.find(function(i){return i.id===id});if(!item)return;
+  document.getElementById("edit-id").value=id;
+  document.getElementById("edit-task").value=item.task;
+  document.getElementById("edit-owner").value=item.owner;
+  document.getElementById("edit-due").value=item.dueDate||"";
+  document.getElementById("edit-source").value=item.source||"";
+  document.getElementById("edit-priority").value=item.priority||"Med";
+  var sel=document.getElementById("edit-project");sel.innerHTML="";
+  projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;if(p===item.project)o.selected=true;sel.appendChild(o)});
+  document.getElementById("editModal").classList.add("open");
+}
+function getBlockHtml(item){
+  if(item.progress==="blocked"){
+    var val=(item.blockReason||"").replace(/"/g,"&quot;");
+    return '<input class="block-input" id="block-input-'+item.id+'" value="'+val+'" placeholder="Reason...">';
+  }
+  return"";
+}
+function render(){
+  var filtered=items.filter(function(i){return currentFilter==="all"||i.project===currentFilter});
+  if(showMineOnly)filtered=filtered.filter(function(i){return MY_NAMES.indexOf((i.owner||"").toLowerCase())!==-1});
+  if(hideDone)filtered=filtered.filter(function(i){return getStatus(i)!=="done"});
+  if(manualSort)filtered.sort(function(a,b){return(a.sortOrder||0)-(b.sortOrder||0)});
+  else filtered.sort(function(a,b){var va=a[sortCol]||"",vb=b[sortCol]||"";if(sortCol==="id"){va=+va;vb=+vb};return sortAsc?(va>vb?1:-1):(va<vb?1:-1)});
+  var tbody=document.getElementById("tbody");var h="";
+  filtered.forEach(function(i,idx){
+    var s=getStatus(i);
+    var checked=i.progress==="done"?"checked":"";
+    var rowClass=i.progress==="done"?"done-row":"";
+    var dueClass=getDueClass(i);
+    var pClass=i.priority==="High"?"priority-high":i.priority==="Low"?"priority-low":"priority-med";
+    var ct=i.completedAt?'<span class="completed-at">Done '+new Date(i.completedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})+"</span>":"";
+    var draggable=manualSort?'draggable="true"':"";
+    h+='<tr class="'+rowClass+'" data-id="'+i.id+'" '+draggable+'>';
+    h+='<td><span class="drag-handle" style="visibility:'+(manualSort?"visible":"hidden")+'">::</span></td>';
+    h+='<td><button class="expand-btn" id="exp-'+i.id+'" onclick="toggleNotes('+i.id+')">&rsaquo;</button></td>';
+    h+='<td><input type="checkbox" class="checkbox" '+checked+' onchange="toggleItem('+i.id+')"></td>';
+    h+='<td>'+(idx+1)+'</td>';
+    h+='<td><span class="project-badge">'+i.project+'</span></td>';
+    h+='<td class="task-cell"><span class="priority '+pClass+'"></span><span class="task-text">'+i.task+'</span>';
+    h+='<div class="progress-container" onclick="cycleProgress('+i.id+')" title="Click to cycle: Not Started > In Progress > Blocked > Done"><div class="progress-fill '+i.progress+'"></div></div>';
+    h+='<div class="progress-label"><span class="stage '+i.progress+'">'+STAGE_LABELS[i.progress]+'</span></div>';
+    h+=getBlockHtml(i)+ct+'</td>';
+    h+='<td>'+i.owner+'</td>';
+    h+='<td class="'+dueClass+'">'+(i.dueDate||"-")+'</td>';
+    h+='<td>'+(i.source||"-")+'</td>';
+    h+='<td><button class="edit-btn" onclick="editItem('+i.id+')" title="Edit">&#9998;</button> <button class="delete-btn" onclick="deleteItem('+i.id+')" title="Delete">&times;</button></td>';
+    h+='</tr>';
+    h+='<tr class="notes-row" id="notes-'+i.id+'"><td colspan="10"><textarea class="notes-textarea" id="note-text-'+i.id+'" placeholder="Add notes...">'+(i.notes||"")+'</textarea></td></tr>';
+  });
+  tbody.innerHTML=h;
+  document.getElementById("empty").style.display=filtered.length?"none":"block";
+  if(manualSort){
+    tbody.querySelectorAll("tr[draggable]").forEach(function(row){
+      row.addEventListener("dragstart",function(){dragId=+row.dataset.id;row.style.opacity="0.4"});
+      row.addEventListener("dragend",function(){row.style.opacity="1";dragId=null});
+      row.addEventListener("dragover",function(e){e.preventDefault();row.classList.add("drag-over")});
+      row.addEventListener("dragleave",function(){row.classList.remove("drag-over")});
+      row.addEventListener("drop",function(e){
+        e.preventDefault();row.classList.remove("drag-over");
+        var tid=+row.dataset.id;if(dragId===null||dragId===tid)return;
+        var di=items.findIndex(function(x){return x.id===dragId});
+        var ti=items.findIndex(function(x){return x.id===tid});
+        var m=items.splice(di,1)[0];items.splice(ti,0,m);
+        items.forEach(function(x,idx){x.sortOrder=idx});saveItems();render();
+      });
+    });
+  }
+  var all=currentFilter==="all"?items:items.filter(function(i){return i.project===currentFilter});
+  var ns=all.filter(function(i){return i.progress==="not-started"}).length;
+  var ip=all.filter(function(i){return i.progress==="in-progress"}).length;
+  var bl=all.filter(function(i){return i.progress==="blocked"}).length;
+  var od=all.filter(function(i){return i.dueDate&&new Date(i.dueDate)<new Date()&&i.progress!=="done"}).length;
+  var dn=all.filter(function(i){return i.progress==="done"}).length;
+  document.getElementById("summary").innerHTML='<div class="card notstarted"><div class="card-value">'+ns+'</div><div class="card-label">Not Started</div></div><div class="card inprog"><div class="card-value">'+ip+'</div><div class="card-label">In Progress</div></div><div class="card blocked"><div class="card-value">'+bl+'</div><div class="card-label">Blocked</div></div><div class="card overdue"><div class="card-value">'+od+'</div><div class="card-label">Overdue</div></div><div class="card done"><div class="card-value">'+dn+'</div><div class="card-label">Done</div></div>';
+}
+function addProjectToUI(name){
+  var tabs=document.getElementById("tabs");
+  if(tabs.querySelector('[data-filter="'+name+'"]'))return;
+  var addBtn=document.getElementById("addProjectBtn");
+  var btn=document.createElement("button");
+  btn.className="tab";btn.dataset.filter=name;btn.textContent=name;btn.setAttribute("draggable","true");
+  btn.addEventListener("click",function(){
+    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
+    btn.classList.add("active");currentFilter=name;hideUpdatesView();render();
+  });
+  tabs.insertBefore(btn,addBtn);
+  var sel=document.getElementById("f-project");
+  if(!sel.querySelector('option[value="'+name+'"]')){var o=document.createElement("option");o.value=name;o.textContent=name;sel.appendChild(o)}
+}
+function populateProjectDropdown(){
+  var sel=document.getElementById("f-project");sel.innerHTML="";
+  projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;sel.appendChild(o)});
+}
+
+// Init
+projects=loadProjects();
+items=loadItems();
+projects.forEach(function(p){addProjectToUI(p)});
+// Add Updates tab
+(function(){
+  var tabs=document.getElementById("tabs");
+  var addBtn=document.getElementById("addProjectBtn");
+  var updTab=document.createElement("button");
+  updTab.className="tab";updTab.dataset.filter="__updates__";updTab.textContent="Updates";
+  updTab.style.borderColor="#a371f7";updTab.style.color="#a371f7";
+  updTab.addEventListener("click",function(){
+    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
+    updTab.classList.add("active");currentFilter="__updates__";showUpdatesView();
+  });
+  var firstProjTab=tabs.querySelector('.tab:not([data-filter="all"])');
+  if(firstProjTab)tabs.insertBefore(updTab,firstProjTab);else tabs.insertBefore(updTab,addBtn);
+})();
+updates=loadUpdates();
+document.getElementById("submitUpdate").addEventListener("click",addUpdate);
+document.getElementById("upd-text").addEventListener("keydown",function(e){if(e.ctrlKey&&e.key==="Enter")addUpdate()});
+
+populateProjectDropdown();
+document.getElementById("lastUpdate").textContent=new Date().toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+
+// Event listeners
+document.querySelectorAll("th[data-sort]").forEach(function(th){th.addEventListener("click",function(){
+  if(manualSort)return;var col=th.dataset.sort;if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true};render();
+})});
+document.getElementById("toggleDone").addEventListener("click",function(){hideDone=!hideDone;this.textContent=hideDone?"Show Done":"Hide Done";this.classList.toggle("active",hideDone);render()});
+document.getElementById("toggleSort").addEventListener("click",function(){manualSort=!manualSort;this.textContent=manualSort?"Column Sort":"Manual Order";this.classList.toggle("active",manualSort);render()});
+document.getElementById("toggleMine").addEventListener("click",function(){showMineOnly=!showMineOnly;this.textContent=showMineOnly?"All AIs":"My AIs";this.classList.toggle("active",showMineOnly);render()});
+document.getElementById("toggleTheme").addEventListener("click",function(){var c=localStorage.getItem(THEME_KEY)||"dark";var n=c==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,n);applyTheme(n)});
+document.getElementById("undoBtn").addEventListener("click",function(){if(!undoStack.length){alert("Nothing to undo");return};redoStack.push(JSON.stringify(items));items=JSON.parse(undoStack.pop());saveItems();render()});
+document.getElementById("redoBtn").addEventListener("click",function(){if(!redoStack.length){alert("Nothing to redo");return};undoStack.push(JSON.stringify(items));items=JSON.parse(redoStack.pop());saveItems();render()});
+document.getElementById("addBtn").addEventListener("click",function(){document.getElementById("addForm").classList.toggle("open")});
+document.getElementById("submitBtn").addEventListener("click",function(){
+  var task=document.getElementById("f-task").value.trim();if(!task){alert("Task is required");return}
+  pushUndo();
+  items.push(migrateItem({id:Date.now(),project:document.getElementById("f-project").value,task:task,owner:document.getElementById("f-owner").value||"MB",dueDate:document.getElementById("f-due").value||"",priority:document.getElementById("f-priority").value,status:"Open",progress:"not-started",source:document.getElementById("f-source").value||"",notes:document.getElementById("f-notes").value||"",dateAdded:new Date().toISOString().split("T")[0],completedAt:null,blockReason:"",sortOrder:items.length}));
+  saveItems();document.getElementById("f-task").value="";document.getElementById("f-due").value="";document.getElementById("f-source").value="";document.getElementById("f-notes").value="";document.getElementById("addForm").classList.remove("open");render();
+});
+document.getElementById("addProjectBtn").addEventListener("click",function(){document.getElementById("projectModal").classList.add("open")});
+document.getElementById("cancelProject").addEventListener("click",function(){document.getElementById("projectModal").classList.remove("open");document.getElementById("new-project-name").value=""});
+document.getElementById("submitProject").addEventListener("click",function(){
+  var name=document.getElementById("new-project-name").value.trim();if(!name){alert("Enter a project name");return}
+  if(projects.indexOf(name)!==-1){alert("Project already exists");return}
+  projects.push(name);saveProjectsList();addProjectToUI(name);populateProjectDropdown();
+  document.getElementById("projectModal").classList.remove("open");document.getElementById("new-project-name").value="";
+});
+document.getElementById("saveEdit").addEventListener("click",function(){
+  var id=parseInt(document.getElementById("edit-id").value);var item=items.find(function(i){return i.id===id});if(!item)return;
+  pushUndo();item.project=document.getElementById("edit-project").value;item.task=document.getElementById("edit-task").value;
+  item.owner=document.getElementById("edit-owner").value;item.dueDate=document.getElementById("edit-due").value;
+  item.priority=document.getElementById("edit-priority").value;item.source=document.getElementById("edit-source").value;
+  saveItems();document.getElementById("editModal").classList.remove("open");render();
+});
+document.getElementById("cancelEdit").addEventListener("click",function(){document.getElementById("editModal").classList.remove("open")});
+
+// Block reason + notes - event delegation
+document.addEventListener("input",function(e){
+  if(e.target&&e.target.classList.contains("block-input")){
+    var id=parseInt(e.target.id.replace("block-input-",""));
+    var item=items.find(function(i){return i.id===id});
+    if(item){item.blockReason=e.target.value;saveItems()}
+  }
+  if(e.target&&e.target.classList.contains("notes-textarea")){
+    var id=parseInt(e.target.id.replace("note-text-",""));
+    var item=items.find(function(i){return i.id===id});
+    if(item){item.notes=e.target.value;saveItems()}
+  }
+});
+
+// Tab reorder via drag
+(function(){
+  var tabs=document.getElementById("tabs");var dragTab=null;
+  tabs.addEventListener("dragstart",function(e){
+    var tab=e.target.closest(".tab");if(!tab||tab.dataset.filter==="all"){e.preventDefault();return}
+    dragTab=tab;tab.style.opacity="0.4";
+  });
+  tabs.addEventListener("dragend",function(){if(dragTab){dragTab.style.opacity="1";dragTab=null}});
+  tabs.addEventListener("dragover",function(e){
+    e.preventDefault();var tab=e.target.closest(".tab");
+    if(tab&&tab!==dragTab&&tab.dataset.filter!=="all")tab.style.borderLeft="2px solid #58a6ff";
+  });
+  tabs.addEventListener("dragleave",function(e){var tab=e.target.closest(".tab");if(tab)tab.style.borderLeft=""});
+  tabs.addEventListener("drop",function(e){
+    e.preventDefault();var tab=e.target.closest(".tab");if(tab)tab.style.borderLeft="";
+    if(!tab||!dragTab||tab===dragTab)return;
+    tabs.insertBefore(dragTab,tab);
+    var newOrder=[];tabs.querySelectorAll(".tab").forEach(function(t){if(t.dataset.filter&&t.dataset.filter!=="all")newOrder.push(t.dataset.filter)});
+    projects=newOrder;saveProjectsList();
+  });
+})();
+
+// Right-click to remove project tab
+document.getElementById("tabs").addEventListener("contextmenu",function(e){
+  var tab=e.target.closest(".tab");if(!tab||tab.dataset.filter==="all")return;
+  e.preventDefault();var name=tab.dataset.filter;
+  if(confirm("Remove project tab '"+name+"'? (Items under it won't be deleted)")){
+    projects=projects.filter(function(p){return p!==name});saveProjectsList();tab.remove();
+    if(currentFilter===name){currentFilter="all";document.querySelector('.tab[data-filter="all"]').classList.add("active");render()}
+    populateProjectDropdown();
+  }
+});
+
+
+document.querySelector('.tab[data-filter="all"]').addEventListener("click",function(){
+  document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
+  this.classList.add("active");currentFilter="all";hideUpdatesView();render();
+});
+render();
+</script>
+</body>
+</html>
