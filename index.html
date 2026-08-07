@@ -145,7 +145,46 @@ tr.drag-over td{border-top:2px solid #58a6ff}
 .subtask-inline-input{background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:6px 10px;border-radius:6px;font-size:.8rem;width:100%;max-width:300px}
 .subtask-inline-input:focus{outline:none;border-color:#58a6ff}
 .done-subtask .subtask-task{text-decoration:line-through;opacity:.5}
-@media(max-width:768px){.summary{flex-direction:column}table{font-size:.75rem}td,th{padding:8px}.form-grid{grid-template-columns:1fr}.subtask-row td{padding:6px 8px 6px 24px}}
+@media(max-width:768px){
+.summary{flex-direction:column}
+.form-grid{grid-template-columns:1fr}
+.table-wrap{display:none}
+.mobile-cards{display:flex!important;flex-direction:column;gap:12px;margin-top:12px}
+.tabs{gap:6px}
+.tab{padding:6px 12px;font-size:.75rem}
+.controls{flex-direction:column;gap:8px}
+}
+.mobile-cards{display:none}
+.mobile-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:14px;position:relative;overflow:hidden}
+.mobile-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px}
+.mobile-card.mc-blocked::before{background:#d29922}
+.mobile-card.mc-in-progress::before{background:#58a6ff}
+.mobile-card.mc-overdue::before{background:#f85149}
+.mobile-card.mc-done::before{background:#3fb950}
+.mobile-card.mc-done{opacity:.5}
+.mobile-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.mobile-card-title{font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:6px;flex:1}
+.mobile-card-title .task-text-m{flex:1}
+.mobile-card-meta{display:flex;gap:12px;font-size:.7rem;color:#8b949e;margin-bottom:6px;flex-wrap:wrap}
+.mobile-card-actions{display:flex;gap:8px;align-items:center}
+.mobile-card-actions button{background:none;border:none;color:#484f58;font-size:1rem;cursor:pointer;padding:4px}
+.mobile-card-progress{margin-top:6px}
+.mobile-subtasks{margin-top:10px;padding-top:10px;border-top:1px solid #21262d}
+.mobile-subtask{display:flex;align-items:center;gap:8px;padding:6px 0 6px 12px;border-left:2px solid #30363d;margin-left:4px;margin-bottom:6px}
+.mobile-subtask.ms-done{opacity:.5}
+.mobile-subtask.ms-done .ms-text{text-decoration:line-through}
+.ms-text{font-size:.78rem;color:#9ca3b0;flex:1}
+.ms-prog{width:50px;height:4px;background:#21262d;border-radius:2px;overflow:hidden}
+.ms-prog-fill{height:100%;border-radius:2px}
+.mobile-sub-input{background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:6px 10px;border-radius:6px;font-size:.78rem;width:100%;margin-top:6px;margin-left:12px;border-left:2px dashed #30363d}
+.mobile-sub-input:focus{outline:none;border-color:#58a6ff}
+.mobile-add-sub{font-size:.7rem;color:#484f58;padding:4px 0 0 12px;border-left:2px dashed #21262d;margin-left:4px;cursor:pointer}
+.mobile-add-sub:hover{color:#58a6ff}
+body.light .mobile-card{background:linear-gradient(135deg,#fff,#f6f8fa);border-color:#d0d7de}
+body.light .mobile-subtask{border-left-color:#d0d7de}
+body.light .ms-text{color:#1f2328}
+body.light .mobile-card-meta{color:#656d76}
+body.light .mobile-sub-input{background:#fff;border-color:#d0d7de;color:#1f2328}
 
 /* Updates Tab Styles */
 .updates-container{display:none;animation:slideDown .3s ease}
@@ -244,6 +283,7 @@ body.light .updates-filter .filter-btn.active{background:#8250df11;border-color:
 <thead><tr><th class="ns"></th><th class="ns"></th><th class="ns"></th><th data-sort="id">#</th><th data-sort="project">Project</th><th data-sort="task">Task / Progress</th><th data-sort="owner">Owner</th><th data-sort="dueDate">Due</th><th data-sort="source">Source</th><th class="ns"></th></tr></thead>
 <tbody id="tbody"></tbody>
 </table></div>
+<div class="mobile-cards" id="mobileCards"></div>
 <div class="empty" id="empty" style="display:none">No action items found.</div>
 <div class="updates-container" id="updatesContainer">
   <div class="update-form">
@@ -668,6 +708,64 @@ function render(){
   var od=all.filter(function(i){return i.dueDate&&new Date(i.dueDate)<new Date()&&i.progress!=="done"}).length;
   var dn=all.filter(function(i){return i.progress==="done"}).length;
   document.getElementById("summary").innerHTML='<div class="card notstarted"><div class="card-value">'+ns+'</div><div class="card-label">Not Started</div></div><div class="card inprog"><div class="card-value">'+ip+'</div><div class="card-label">In Progress</div></div><div class="card blocked"><div class="card-value">'+bl+'</div><div class="card-label">Blocked</div></div><div class="card overdue"><div class="card-value">'+od+'</div><div class="card-label">Overdue</div></div><div class="card done"><div class="card-value">'+dn+'</div><div class="card-label">Done</div></div>';
+  // Mobile cards render
+  renderMobileCards(filtered);
+}
+function renderMobileCards(filtered){
+  var mc=document.getElementById("mobileCards");
+  var mh="";
+  filtered.forEach(function(i){
+    var s=getStatus(i);
+    var mcClass="mc-"+s;
+    var pDot=i.priority==="High"?"priority-high":i.priority==="Low"?"priority-low":"priority-med";
+    var dueStr=i.dueDate?i.dueDate:"-";
+    var dueClass=getDueClass(i);
+    var subs=getSubtasksForItem(i.id);
+    var subsDone=subs.filter(function(x){return x.progress==="done"}).length;
+    var stageColor=i.progress==="done"?"#3fb950":i.progress==="in-progress"?"#58a6ff":i.progress==="blocked"?"#d29922":"#8b949e";
+    var blockText=i.progress==="blocked"&&i.blockReason?" - "+i.blockReason:"";
+    mh+='<div class="mobile-card '+mcClass+'" data-id="'+i.id+'">';
+    mh+='<div class="mobile-card-header">';
+    mh+='<div class="mobile-card-title"><span class="priority '+pDot+'"></span><span class="task-text-m">'+(i.progress==="done"?"<s>"+i.task+"</s>":i.task)+'</span></div>';
+    mh+='<span class="project-badge">'+i.project+'</span>';
+    mh+='</div>';
+    mh+='<div class="mobile-card-meta">';
+    mh+='<span>'+i.owner+'</span>';
+    mh+='<span class="'+dueClass+'">Due: '+dueStr+'</span>';
+    if(subs.length)mh+='<span class="subtask-count'+(subsDone===subs.length?" complete":"")+'">'+subsDone+'/'+subs.length+'</span>';
+    if(i.source)mh+='<span>'+i.source+'</span>';
+    mh+='</div>';
+    mh+='<div class="mobile-card-progress">';
+    mh+='<div class="progress-container" onclick="cycleProgress('+i.id+')"><div class="progress-fill '+i.progress+'"></div></div>';
+    mh+='<span class="stage '+i.progress+'" style="font-size:.65rem">'+STAGE_LABELS[i.progress]+blockText+'</span>';
+    mh+='</div>';
+    mh+='<div class="mobile-card-actions">';
+    mh+='<button onclick="toggleSubtaskExpand('+i.id+')" title="Sub-tasks" style="color:#3fb950;font-size:.75rem">+sub</button>';
+    mh+='<button onclick="editItem('+i.id+')" style="color:#58a6ff">&#9998;</button>';
+    mh+='<button onclick="deleteItem('+i.id+')" style="color:#f85149">&times;</button>';
+    mh+='<input type="checkbox" class="checkbox" '+(i.progress==="done"?"checked":"")+' onchange="toggleItem('+i.id+')">';
+    mh+='</div>';
+    // Sub-tasks
+    if(expandedSubtasks[i.id]||subs.length>0){
+      mh+='<div class="mobile-subtasks"'+(expandedSubtasks[i.id]?'':' style="display:none"')+'>';
+      subs.forEach(function(st){
+        var stColor=st.progress==="done"?"#3fb950":st.progress==="in-progress"?"#58a6ff":st.progress==="blocked"?"#d29922":"#484f58";
+        var stW=st.progress==="done"?"100%":st.progress==="in-progress"?"50%":st.progress==="blocked"?"50%":"0%";
+        var stDoneClass=st.progress==="done"?"ms-done":"";
+        mh+='<div class="mobile-subtask '+stDoneClass+'" onclick="cycleSubtaskProgress('+st.id+')">';
+        mh+='<input type="checkbox" class="subtask-checkbox" '+(st.progress==="done"?"checked":"")+' onchange="event.stopPropagation();toggleSubtask('+st.id+')">';
+        mh+='<span class="ms-text">'+st.task+'</span>';
+        mh+='<div class="ms-prog"><div class="ms-prog-fill" style="width:'+stW+';background:'+stColor+'"></div></div>';
+        mh+='</div>';
+      });
+      if(expandedSubtasks[i.id]){
+        mh+='<input class="mobile-sub-input" id="msub-input-'+i.id+'" placeholder="Add sub-task... (Enter)" onkeydown="if(event.key===\'Enter\'){addSubtask('+i.id+',this.value);this.value=\'\'}">';
+      }
+      mh+='</div>';
+    }
+    mh+='</div>';
+  });
+  mc.innerHTML=mh;
 }
 function addProjectToUI(name){
   var tabs=document.getElementById("tabs");
