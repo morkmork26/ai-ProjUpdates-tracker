@@ -922,7 +922,8 @@ function syncToCloud() {
   syncInProgress = true;
   var btn = document.getElementById("syncBtn");
   if (btn) btn.textContent = "Syncing...";
-  var payload = {action: "save", app: "ai", data: {items: items, updates: updates, projects: projects}};
+  var itemsForCloud = items.map(function(i){var c=JSON.parse(JSON.stringify(i));c.subtasksJson=JSON.stringify(c.subtasks||[]);delete c.subtasks;return c});
+  var payload = {action: "save", app: "ai", data: {items: itemsForCloud, updates: updates, projects: projects}};
   fetch(SCRIPT_URL, {method: "POST", body: JSON.stringify(payload), headers: {"Content-Type": "text/plain"}})
     .then(function(r) { return r.json(); })
     .then(function(d) { syncInProgress = false; if (btn) btn.innerHTML = "&#9729; Sync"; console.log("Synced to cloud:", d.timestamp); })
@@ -939,6 +940,8 @@ function loadFromCloud() {
         d.items.forEach(function(item) {
           if (item.dueDate) item.dueDate = fixDate(item.dueDate);
           if (item.dateAdded) item.dateAdded = fixDate(item.dateAdded);
+          if (item.subtasksJson){try{item.subtasks=JSON.parse(item.subtasksJson)}catch(e){item.subtasks=[]}delete item.subtasksJson}
+          if (!item.subtasks) item.subtasks=[];
         });
         var cloudIds = d.items.map(function(i) { return i.id; });
         var localOnly = items.filter(function(i) { return cloudIds.indexOf(i.id) === -1; });
