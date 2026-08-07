@@ -374,44 +374,47 @@ var STAGE_LABELS = {"not-started":"Not Started","in-progress":"In Progress","blo
 
 var EMBEDDED_UPDATES = [];
 var UPDATES_KEY = "ai_tracker_updates";
-var SUBTASKS_KEY = "ai_tracker_subtasks";
 var updates = [];
-var subtasks = [];
 var updatesFilter = "all";
 var expandedSubtasks = {};
 
-function loadSubtasks(){
-  var stored=localStorage.getItem(SUBTASKS_KEY);
-  if(stored)return JSON.parse(stored);
-  return[];
+function getSubtasksForItem(parentId){
+  var item=items.find(function(i){return i.id===parentId});
+  return item&&item.subtasks?item.subtasks:[];
 }
-function saveSubtasks(){localStorage.setItem(SUBTASKS_KEY,JSON.stringify(subtasks))}
-function getSubtasksForItem(parentId){return subtasks.filter(function(s){return s.parentId===parentId})}
 function addSubtask(parentId,task){
   if(!task)return;
   pushUndo();
-  subtasks.push({id:Date.now(),parentId:parentId,task:task,progress:"not-started",blockReason:"",completedAt:null,sortOrder:getSubtasksForItem(parentId).length});
-  saveSubtasks();render();
+  var item=items.find(function(i){return i.id===parentId});if(!item)return;
+  if(!item.subtasks)item.subtasks=[];
+  item.subtasks.push({id:Date.now(),task:task,progress:"not-started",blockReason:"",completedAt:null,sortOrder:item.subtasks.length});
+  saveItems();render();
 }
 function deleteSubtask(id){
   if(!confirm("Delete this sub-task?"))return;
-  pushUndo();subtasks=subtasks.filter(function(s){return s.id!==id});saveSubtasks();render();
+  pushUndo();
+  items.forEach(function(item){if(item.subtasks)item.subtasks=item.subtasks.filter(function(s){return s.id!==id})});
+  saveItems();render();
+}
+function findSubtask(id){
+  for(var i=0;i<items.length;i++){if(items[i].subtasks){for(var j=0;j<items[i].subtasks.length;j++){if(items[i].subtasks[j].id===id)return items[i].subtasks[j]}}}
+  return null;
 }
 function cycleSubtaskProgress(id){
   pushUndo();
-  var st=subtasks.find(function(s){return s.id===id});if(!st)return;
+  var st=findSubtask(id);if(!st)return;
   var idx=STAGES.indexOf(st.progress);
   st.progress=STAGES[(idx+1)%STAGES.length];
   if(st.progress==="done")st.completedAt=new Date().toISOString();else st.completedAt=null;
   if(st.progress!=="blocked")st.blockReason="";
-  saveSubtasks();render();
+  saveItems();render();
 }
 function toggleSubtask(id){
   pushUndo();
-  var st=subtasks.find(function(s){return s.id===id});if(!st)return;
+  var st=findSubtask(id);if(!st)return;
   if(st.progress==="done"){st.progress="not-started";st.completedAt=null}
   else{st.progress="done";st.completedAt=new Date().toISOString()}
-  st.blockReason="";saveSubtasks();render();
+  st.blockReason="";saveItems();render();
 }
 function toggleSubtaskExpand(parentId){
   expandedSubtasks[parentId]=!expandedSubtasks[parentId];render();
@@ -527,6 +530,7 @@ function migrateItem(item){
   if(!item.notes)item.notes="";
   if(!item.completedAt)item.completedAt=null;
   if(item.sortOrder===undefined)item.sortOrder=0;
+  if(!item.subtasks)item.subtasks=[];
   if(item.project==="LT8460 Die Rev")item.project="LT8460";
   return item;
 }
@@ -593,8 +597,7 @@ function toggleItem(id){
 function deleteItem(id){
   if(!confirm("Delete this AI?"))return;
   pushUndo();items=items.filter(function(i){return i.id!==id});
-  subtasks=subtasks.filter(function(s){return s.parentId!==id});
-  saveItems();saveSubtasks();render();
+  saveItems();render();
 }
 function toggleNotes(id){
   var row=document.getElementById("notes-"+id);var btn=document.getElementById("exp-"+id);
@@ -789,7 +792,6 @@ function populateProjectDropdown(){
 // Init
 projects=loadProjects();
 items=loadItems();
-subtasks=loadSubtasks();
 projects.forEach(function(p){addProjectToUI(p)});
 // Add Updates tab
 (function(){
@@ -851,8 +853,8 @@ document.addEventListener("input",function(e){
   if(e.target&&e.target.classList.contains("block-input")){
     if(e.target.id.indexOf("block-input-sub-")===0){
       var id=parseInt(e.target.id.replace("block-input-sub-",""));
-      var st=subtasks.find(function(s){return s.id===id});
-      if(st){st.blockReason=e.target.value;saveSubtasks()}
+      var st=findSubtask(id);
+      if(st){st.blockReason=e.target.value;saveItems()}
     }else{
       var id=parseInt(e.target.id.replace("block-input-",""));
       var item=items.find(function(i){return i.id===id});
@@ -920,7 +922,7 @@ function syncToCloud() {
   syncInProgress = true;
   var btn = document.getElementById("syncBtn");
   if (btn) btn.textContent = "Syncing...";
-  var payload = {action: "save", app: "ai", data: {items: items, updates: updates, projects: projects, subtasks: subtasks}};
+  var payload = {action: "save", app: "ai", data: {items: items, updates: updates, projects: projects}};
   fetch(SCRIPT_URL, {method: "POST", body: JSON.stringify(payload), headers: {"Content-Type": "text/plain"}})
     .then(function(r) { return r.json(); })
     .then(function(d) { syncInProgress = false; if (btn) btn.innerHTML = "&#9729; Sync"; console.log("Synced to cloud:", d.timestamp); })
@@ -953,13 +955,6 @@ function loadFromCloud() {
         localStorage.setItem(UPDATES_KEY, JSON.stringify(updates));
         changed = true;
       }
-      if (d.subtasks && d.subtasks.length > 0) {
-        var cloudSIds = d.subtasks.map(function(s) { return s.id; });
-        var localOnlyS = subtasks.filter(function(s) { return cloudSIds.indexOf(s.id) === -1; });
-        subtasks = d.subtasks.concat(localOnlyS);
-        localStorage.setItem(SUBTASKS_KEY, JSON.stringify(subtasks));
-        changed = true;
-      }
       // Only use cloud projects if they are valid strings
       if (d.projects && d.projects.length > 0 && typeof d.projects[0] === "string") {
         projects = d.projects;
@@ -978,8 +973,7 @@ var _origSaveUpdates = saveUpdates;
 saveUpdates = function() { _origSaveUpdates(); syncToCloud(); };
 var _origSaveProjectsList = saveProjectsList;
 saveProjectsList = function() { _origSaveProjectsList(); syncToCloud(); };
-var _origSaveSubtasks = saveSubtasks;
-saveSubtasks = function() { _origSaveSubtasks(); syncToCloud(); };
+
 
 // Sync button click
 document.getElementById("syncBtn").addEventListener("click", function() { syncToCloud(); });
