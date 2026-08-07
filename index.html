@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#58a6ff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>AI Tracker - All Projects</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -122,7 +127,25 @@ tr.drag-over td{border-top:2px solid #58a6ff}
 .block-input{background:#0d1117;border:1px solid #d29922;color:#d29922;padding:4px 8px;border-radius:4px;font-size:.7rem;margin-top:3px;width:100%;max-width:250px}
 .block-input:focus{outline:none;border-color:#58a6ff}
 .task-cell{min-width:200px}
-@media(max-width:768px){.summary{flex-direction:column}table{font-size:.75rem}td,th{padding:8px}.form-grid{grid-template-columns:1fr}}
+.subtask-row td{padding:8px 16px 8px 32px;border-top:1px solid #21262d44;font-size:.8rem}
+.subtask-row td:first-child{position:relative}
+.subtask-branch{position:absolute;left:16px;top:0;bottom:50%;width:14px;border-left:2px solid #30363d;border-bottom:2px solid #30363d;border-radius:0 0 0 6px}
+.subtask-branch.dashed{border-left-style:dashed;border-bottom-style:dashed}
+.subtask-task{color:#9ca3b0}
+.subtask-progress{width:80%;max-width:200px;height:4px;background:#21262d;border-radius:2px;margin-top:4px;overflow:hidden}
+.subtask-progress-fill{height:100%;border-radius:2px}
+.subtask-checkbox{width:14px;height:14px;accent-color:#3fb950}
+.subtask-stage{font-size:.6rem;margin-top:2px;font-weight:600}
+.subtask-add-btn{background:none;border:1px dashed #30363d;color:#484f58;padding:4px 10px;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .2s}
+.subtask-add-btn:hover{border-color:#58a6ff;color:#58a6ff}
+.subtask-count{font-size:.6rem;color:#8b949e;background:#21262d;padding:2px 6px;border-radius:8px;margin-left:8px}
+.subtask-count.complete{background:#3fb95022;color:#3fb950}
+.add-sub-btn{background:none;border:none;color:#3fb950;cursor:pointer;font-size:.75rem;padding:4px;transition:color .2s}
+.add-sub-btn:hover{color:#3fb950cc}
+.subtask-inline-input{background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:6px 10px;border-radius:6px;font-size:.8rem;width:100%;max-width:300px}
+.subtask-inline-input:focus{outline:none;border-color:#58a6ff}
+.done-subtask .subtask-task{text-decoration:line-through;opacity:.5}
+@media(max-width:768px){.summary{flex-direction:column}table{font-size:.75rem}td,th{padding:8px}.form-grid{grid-template-columns:1fr}.subtask-row td{padding:6px 8px 6px 24px}}
 
 /* Updates Tab Styles */
 .updates-container{display:none;animation:slideDown .3s ease}
@@ -163,14 +186,19 @@ body.light .updates-filter .filter-btn.active{background:#8250df11;border-color:
 <p class="subtitle">Last updated: <span id="lastUpdate"></span></p>
 <div class="summary" id="summary"></div>
 <div class="tabs" id="tabs"><button class="tab active" data-filter="all">All</button><button class="btn btn-proj" id="addProjectBtn">+</button></div>
-<div class="controls">
-  <button class="btn btn-add" id="addBtn">+ Add AI</button>
-  <button class="btn" id="toggleDone">Hide Done</button>
-  <button class="btn" id="toggleSort">Manual Order</button>
-  <button class="btn" id="toggleMine">My AIs</button>
-  <button class="btn" id="undoBtn" style="border-color:#f85149;color:#f85149">Undo</button>
-  <button class="btn" id="redoBtn" style="border-color:#58a6ff;color:#58a6ff">Redo</button>
-  <button class="btn" id="toggleTheme">Light Mode</button>
+<div class="controls" style="justify-content:space-between">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-add" id="addBtn">+ Add AI</button>
+    <button class="btn" id="toggleDone">Hide Done</button>
+    <button class="btn" id="toggleSort">Manual Order</button>
+    <button class="btn" id="toggleMine">My AIs</button>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn" id="undoBtn" style="border-color:#f85149;color:#f85149;padding:8px 10px" title="Undo">&#8617;</button>
+    <button class="btn" id="redoBtn" style="border-color:#58a6ff;color:#58a6ff;padding:8px 10px" title="Redo">&#8618;</button>
+    <button class="btn" id="syncBtn" style="border-color:#3fb950;color:#3fb950" title="Sync to Google Sheets">&#9729;</button>
+    <button class="btn" id="toggleTheme" style="padding:8px 10px" title="Toggle theme">&#9790;</button>
+  </div>
 </div>
 <div class="add-form" id="addForm">
   <div class="form-grid">
@@ -306,8 +334,55 @@ var STAGE_LABELS = {"not-started":"Not Started","in-progress":"In Progress","blo
 
 var EMBEDDED_UPDATES = [];
 var UPDATES_KEY = "ai_tracker_updates";
+var SUBTASKS_KEY = "ai_tracker_subtasks";
 var updates = [];
+var subtasks = [];
 var updatesFilter = "all";
+var expandedSubtasks = {};
+
+function loadSubtasks(){
+  var stored=localStorage.getItem(SUBTASKS_KEY);
+  if(stored)return JSON.parse(stored);
+  return[];
+}
+function saveSubtasks(){localStorage.setItem(SUBTASKS_KEY,JSON.stringify(subtasks))}
+function getSubtasksForItem(parentId){return subtasks.filter(function(s){return s.parentId===parentId})}
+function addSubtask(parentId,task){
+  if(!task)return;
+  pushUndo();
+  subtasks.push({id:Date.now(),parentId:parentId,task:task,progress:"not-started",blockReason:"",completedAt:null,sortOrder:getSubtasksForItem(parentId).length});
+  saveSubtasks();render();
+}
+function deleteSubtask(id){
+  if(!confirm("Delete this sub-task?"))return;
+  pushUndo();subtasks=subtasks.filter(function(s){return s.id!==id});saveSubtasks();render();
+}
+function cycleSubtaskProgress(id){
+  pushUndo();
+  var st=subtasks.find(function(s){return s.id===id});if(!st)return;
+  var idx=STAGES.indexOf(st.progress);
+  st.progress=STAGES[(idx+1)%STAGES.length];
+  if(st.progress==="done")st.completedAt=new Date().toISOString();else st.completedAt=null;
+  if(st.progress!=="blocked")st.blockReason="";
+  saveSubtasks();render();
+}
+function toggleSubtask(id){
+  pushUndo();
+  var st=subtasks.find(function(s){return s.id===id});if(!st)return;
+  if(st.progress==="done"){st.progress="not-started";st.completedAt=null}
+  else{st.progress="done";st.completedAt=new Date().toISOString()}
+  st.blockReason="";saveSubtasks();render();
+}
+function toggleSubtaskExpand(parentId){
+  expandedSubtasks[parentId]=!expandedSubtasks[parentId];render();
+}
+function getSubtaskCountHtml(parentId){
+  var subs=getSubtasksForItem(parentId);
+  if(!subs.length)return"";
+  var done=subs.filter(function(s){return s.progress==="done"}).length;
+  var cls=done===subs.length?"subtask-count complete":"subtask-count";
+  return'<span class="'+cls+'">'+done+'/'+subs.length+'</span>';
+}
 
 function loadUpdates(){
   var stored=localStorage.getItem(UPDATES_KEY);
@@ -417,7 +492,7 @@ function migrateItem(item){
 }
 function loadProjects(){
   var s=localStorage.getItem(PROJECTS_KEY);
-  if(s){var arr=JSON.parse(s);return arr.filter(function(p,i){return arr.indexOf(p)===i&&p!=="asd"&&p!=="LT8460 Die Rev"})}
+  if(s){var arr=JSON.parse(s);return arr.filter(function(p,i){return arr.indexOf(p)===i&&p!=="__updates__"&&p!=="asd"&&p!=="LT8460 Die Rev"})}
   return DEFAULT_PROJECTS.slice();
 }
 function saveProjectsList(){localStorage.setItem(PROJECTS_KEY,JSON.stringify(projects))}
@@ -467,12 +542,19 @@ function toggleItem(id){
   pushUndo();
   var item=items.find(function(i){return i.id===id});if(!item)return;
   if(item.progress==="done"){item.progress="in-progress";item.completedAt=null}
-  else{item.progress="done";item.completedAt=new Date().toISOString()}
+  else{
+    var subs=getSubtasksForItem(id);
+    var pending=subs.filter(function(s){return s.progress!=="done"});
+    if(pending.length>0&&!confirm(pending.length+" sub-task(s) not done. Mark parent as Done anyway?"))return;
+    item.progress="done";item.completedAt=new Date().toISOString();
+  }
   item.blockReason="";saveItems();render();
 }
 function deleteItem(id){
   if(!confirm("Delete this AI?"))return;
-  pushUndo();items=items.filter(function(i){return i.id!==id});saveItems();render();
+  pushUndo();items=items.filter(function(i){return i.id!==id});
+  subtasks=subtasks.filter(function(s){return s.parentId!==id});
+  saveItems();saveSubtasks();render();
 }
 function toggleNotes(id){
   var row=document.getElementById("notes-"+id);var btn=document.getElementById("exp-"+id);
@@ -519,15 +601,47 @@ function render(){
     h+='<td>'+(idx+1)+'</td>';
     h+='<td><span class="project-badge">'+i.project+'</span></td>';
     h+='<td class="task-cell"><span class="priority '+pClass+'"></span><span class="task-text">'+i.task+'</span>';
+    h+=getSubtaskCountHtml(i.id);
     h+='<div class="progress-container" onclick="cycleProgress('+i.id+')" title="Click to cycle: Not Started > In Progress > Blocked > Done"><div class="progress-fill '+i.progress+'"></div></div>';
     h+='<div class="progress-label"><span class="stage '+i.progress+'">'+STAGE_LABELS[i.progress]+'</span></div>';
     h+=getBlockHtml(i)+ct+'</td>';
     h+='<td>'+i.owner+'</td>';
     h+='<td class="'+dueClass+'">'+(i.dueDate||"-")+'</td>';
     h+='<td>'+(i.source||"-")+'</td>';
-    h+='<td><button class="edit-btn" onclick="editItem('+i.id+')" title="Edit">&#9998;</button> <button class="delete-btn" onclick="deleteItem('+i.id+')" title="Delete">&times;</button></td>';
+    h+='<td><button class="add-sub-btn" onclick="toggleSubtaskExpand('+i.id+')" title="Sub-tasks">+sub</button> <button class="edit-btn" onclick="editItem('+i.id+')" title="Edit">&#9998;</button> <button class="delete-btn" onclick="deleteItem('+i.id+')" title="Delete">&times;</button></td>';
     h+='</tr>';
     h+='<tr class="notes-row" id="notes-'+i.id+'"><td colspan="10"><textarea class="notes-textarea" id="note-text-'+i.id+'" placeholder="Add notes...">'+(i.notes||"")+'</textarea></td></tr>';
+    // Sub-task rows
+    if(expandedSubtasks[i.id]){
+      var subs=getSubtasksForItem(i.id);
+      subs.sort(function(a,b){return(a.sortOrder||0)-(b.sortOrder||0)});
+      subs.forEach(function(st,si){
+        var stChecked=st.progress==="done"?"checked":"";
+        var stDoneClass=st.progress==="done"?"done-subtask":"";
+        var stFillClass=st.progress;
+        var stFillW=st.progress==="done"?"100%":st.progress==="in-progress"?"50%":st.progress==="blocked"?"50%":"0%";
+        var stColor=st.progress==="done"?"#3fb950":st.progress==="in-progress"?"#58a6ff":st.progress==="blocked"?"#d29922":"#484f58";
+        h+='<tr class="subtask-row '+stDoneClass+'">';
+        h+='<td><div class="subtask-branch"></div></td>';
+        h+='<td></td>';
+        h+='<td><input type="checkbox" class="subtask-checkbox" '+stChecked+' onchange="toggleSubtask('+st.id+')"></td>';
+        h+='<td style="color:#484f58;font-size:.7rem">'+(idx+1)+'.'+(si+1)+'</td>';
+        h+='<td></td>';
+        h+='<td><span class="subtask-task">'+st.task+'</span>';
+        h+='<div class="subtask-progress" onclick="cycleSubtaskProgress('+st.id+')" title="Click to cycle"><div class="subtask-progress-fill" style="width:'+stFillW+';background:'+stColor+'"></div></div>';
+        h+='<span class="subtask-stage" style="color:'+stColor+'">'+STAGE_LABELS[st.progress]+'</span>';
+        if(st.progress==="blocked")h+='<input class="block-input" id="block-input-sub-'+st.id+'" value="'+(st.blockReason||"").replace(/"/g,"&quot;")+'" placeholder="Reason..." style="max-width:200px">';
+        h+='</td>';
+        h+='<td></td><td></td><td></td>';
+        h+='<td><button class="delete-btn" onclick="deleteSubtask('+st.id+')" style="font-size:.75rem">&times;</button></td>';
+        h+='</tr>';
+      });
+      // Add sub-task input row
+      h+='<tr class="subtask-row">';
+      h+='<td><div class="subtask-branch dashed"></div></td>';
+      h+='<td colspan="9"><input class="subtask-inline-input" id="sub-input-'+i.id+'" placeholder="Add a sub-task... (Enter to save)" onkeydown="if(event.key===\'Enter\'){addSubtask('+i.id+',this.value);this.value=\'\'}"></td>';
+      h+='</tr>';
+    }
   });
   tbody.innerHTML=h;
   document.getElementById("empty").style.display=filtered.length?"none":"block";
@@ -577,6 +691,7 @@ function populateProjectDropdown(){
 // Init
 projects=loadProjects();
 items=loadItems();
+subtasks=loadSubtasks();
 projects.forEach(function(p){addProjectToUI(p)});
 // Add Updates tab
 (function(){
@@ -636,9 +751,15 @@ document.getElementById("cancelEdit").addEventListener("click",function(){docume
 // Block reason + notes - event delegation
 document.addEventListener("input",function(e){
   if(e.target&&e.target.classList.contains("block-input")){
-    var id=parseInt(e.target.id.replace("block-input-",""));
-    var item=items.find(function(i){return i.id===id});
-    if(item){item.blockReason=e.target.value;saveItems()}
+    if(e.target.id.indexOf("block-input-sub-")===0){
+      var id=parseInt(e.target.id.replace("block-input-sub-",""));
+      var st=subtasks.find(function(s){return s.id===id});
+      if(st){st.blockReason=e.target.value;saveSubtasks()}
+    }else{
+      var id=parseInt(e.target.id.replace("block-input-",""));
+      var item=items.find(function(i){return i.id===id});
+      if(item){item.blockReason=e.target.value;saveItems()}
+    }
   }
   if(e.target&&e.target.classList.contains("notes-textarea")){
     var id=parseInt(e.target.id.replace("note-text-",""));
@@ -685,7 +806,91 @@ document.querySelector('.tab[data-filter="all"]').addEventListener("click",funct
   document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
   this.classList.add("active");currentFilter="all";hideUpdatesView();render();
 });
+
+// === Google Sheets Sync ===
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJ8wrYPiJYVxD15I_XX0b_tMHUUe4iMIA3eAdgLv5Q9lGqyOc1TKYPx78VvYKAZ900SA/exec";
+var syncInProgress = false;
+
+function fixDate(d) {
+  if (!d) return "";
+  if (typeof d === "string" && d.indexOf("T") > -1) return d.split("T")[0];
+  return String(d);
+}
+
+function syncToCloud() {
+  if (syncInProgress) return;
+  syncInProgress = true;
+  var btn = document.getElementById("syncBtn");
+  if (btn) btn.textContent = "Syncing...";
+  var payload = {action: "save", app: "ai", data: {items: items, updates: updates, projects: projects, subtasks: subtasks}};
+  fetch(SCRIPT_URL, {method: "POST", body: JSON.stringify(payload), headers: {"Content-Type": "text/plain"}})
+    .then(function(r) { return r.json(); })
+    .then(function(d) { syncInProgress = false; if (btn) btn.innerHTML = "&#9729; Sync"; console.log("Synced to cloud:", d.timestamp); })
+    .catch(function(e) { syncInProgress = false; if (btn) btn.innerHTML = "&#9729; Sync"; console.warn("Sync failed:", e); });
+}
+
+function loadFromCloud() {
+  fetch(SCRIPT_URL + "?action=load&app=ai")
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var changed = false;
+      if (d.items && d.items.length > 0) {
+        // Fix dates from Google Sheets (converts to ISO timestamps)
+        d.items.forEach(function(item) {
+          if (item.dueDate) item.dueDate = fixDate(item.dueDate);
+          if (item.dateAdded) item.dateAdded = fixDate(item.dateAdded);
+        });
+        var cloudIds = d.items.map(function(i) { return i.id; });
+        var localOnly = items.filter(function(i) { return cloudIds.indexOf(i.id) === -1; });
+        items = d.items.concat(localOnly);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        localStorage.setItem(STORAGE_KEY+"_ver", String(EMBEDDED_VERSION));
+        changed = true;
+      }
+      if (d.updates && d.updates.length > 0) {
+        d.updates.forEach(function(u) { if (u.date) u.date = fixDate(u.date); });
+        var cloudUIds = d.updates.map(function(u) { return u.id; });
+        var localOnlyU = updates.filter(function(u) { return cloudUIds.indexOf(u.id) === -1; });
+        updates = d.updates.concat(localOnlyU);
+        localStorage.setItem(UPDATES_KEY, JSON.stringify(updates));
+        changed = true;
+      }
+      if (d.subtasks && d.subtasks.length > 0) {
+        var cloudSIds = d.subtasks.map(function(s) { return s.id; });
+        var localOnlyS = subtasks.filter(function(s) { return cloudSIds.indexOf(s.id) === -1; });
+        subtasks = d.subtasks.concat(localOnlyS);
+        localStorage.setItem(SUBTASKS_KEY, JSON.stringify(subtasks));
+        changed = true;
+      }
+      // Only use cloud projects if they are valid strings
+      if (d.projects && d.projects.length > 0 && typeof d.projects[0] === "string") {
+        projects = d.projects;
+        localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+      }
+      if (changed) render();
+      console.log("Loaded from cloud");
+    })
+    .catch(function(e) { console.warn("Cloud load failed, using local:", e); });
+}
+
+// Wrap save functions to also sync
+var _origSaveItems = saveItems;
+saveItems = function() { _origSaveItems(); syncToCloud(); };
+var _origSaveUpdates = saveUpdates;
+saveUpdates = function() { _origSaveUpdates(); syncToCloud(); };
+var _origSaveProjectsList = saveProjectsList;
+saveProjectsList = function() { _origSaveProjectsList(); syncToCloud(); };
+var _origSaveSubtasks = saveSubtasks;
+saveSubtasks = function() { _origSaveSubtasks(); syncToCloud(); };
+
+// Sync button click
+document.getElementById("syncBtn").addEventListener("click", function() { syncToCloud(); });
+
+// Load from cloud on startup
+loadFromCloud();
+
 render();
 </script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}</script>
 </body>
 </html>
