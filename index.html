@@ -153,6 +153,16 @@ tr.drag-over td{border-top:2px solid #58a6ff}
 .tabs{gap:6px}
 .tab{padding:6px 12px;font-size:.75rem}
 .controls{flex-direction:column;gap:8px}
+.wins-header{flex-direction:row;justify-content:space-between}
+.wins-stat{min-width:0;flex:1;padding:12px 10px}
+.wins-stat .ws-val{font-size:1.3rem}
+.win-card{padding:12px 14px}
+.win-card .win-meta{flex-direction:column;gap:4px}
+.week-header{flex-wrap:wrap;gap:8px}
+.week-divider{flex-wrap:wrap;gap:6px}
+.timeline-entry{flex-direction:column;gap:6px}
+.timeline-entry .entry-date{min-width:unset;display:flex;gap:8px;align-items:center}
+.update-form .form-grid{grid-template-columns:1fr}
 }
 .mobile-cards{display:none}
 .mobile-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:14px;position:relative;overflow:hidden}
@@ -218,6 +228,43 @@ body.light .timeline-group-header .count-badge{background:#8250df22;color:#8250d
 body.light .updates-filter .filter-btn{background:#fff;border-color:#d0d7de;color:#656d76}
 body.light .updates-filter .filter-btn:hover{border-color:#8250df;color:#8250df}
 body.light .updates-filter .filter-btn.active{background:#8250df11;border-color:#8250df;color:#8250df}
+
+/* Wins / History Styles */
+.wins-container{display:none;animation:slideDown .3s ease}
+.wins-container.open{display:block}
+.wins-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.wins-stat{background:linear-gradient(135deg,#161b22,#1c2128);border:1px solid #30363d;border-radius:12px;padding:14px 20px;text-align:center;min-width:120px}
+.wins-stat .ws-val{font-size:1.6rem;font-weight:700;color:#3fb950}
+.wins-stat .ws-lbl{font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.wins-stat.streak .ws-val{color:#f0883e}
+.week-section{margin-bottom:32px}
+.week-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #21262d}
+.week-header .wh-label{font-size:.95rem;font-weight:700;color:#3fb950}
+.week-header .wh-range{font-size:.75rem;color:#8b949e}
+.week-header .wh-count{background:#3fb95022;color:#3fb950;padding:3px 10px;border-radius:10px;font-size:.7rem;font-weight:600}
+.week-header .wh-current{background:linear-gradient(135deg,#3fb950,#2ea043);color:#fff;padding:3px 10px;border-radius:10px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.win-card{display:flex;gap:14px;padding:14px 18px;background:#161b22;border:1px solid #30363d;border-radius:10px;border-left:3px solid #3fb950;margin-bottom:10px;transition:transform .2s,box-shadow .2s;align-items:flex-start}
+.win-card:hover{transform:translateX(4px);box-shadow:0 4px 16px rgba(63,185,80,.1)}
+.win-card .win-check{color:#3fb950;font-size:1.2rem;margin-top:2px}
+.win-card .win-body{flex:1}
+.win-card .win-task{font-size:.88rem;font-weight:600;color:#c9d1d9;margin-bottom:4px}
+.win-card .win-meta{display:flex;gap:12px;font-size:.7rem;color:#8b949e;flex-wrap:wrap;align-items:center}
+.win-card .win-meta .win-duration{background:#58a6ff22;color:#58a6ff;padding:2px 8px;border-radius:6px;font-weight:600}
+.win-card .win-meta .win-added{color:#484f58}
+.wins-empty{text-align:center;padding:48px;color:#8b949e}
+.wins-empty .wins-empty-icon{font-size:3rem;margin-bottom:12px;opacity:.4}
+body.light .wins-stat{background:linear-gradient(135deg,#fff,#f6f8fa);border-color:#d0d7de}
+body.light .week-header{border-bottom-color:#d0d7de}
+body.light .win-card{background:#fff;border-color:#d0d7de;border-left-color:#2da44e}
+body.light .win-card:hover{box-shadow:0 4px 16px rgba(45,164,78,.08)}
+body.light .win-card .win-task{color:#1f2328}
+
+/* Updates weekly dividers */
+.week-divider{display:flex;align-items:center;gap:12px;margin:20px 0 14px;padding-bottom:8px;border-bottom:1px solid #21262d}
+.week-divider .wd-label{font-size:.8rem;font-weight:700;color:#58a6ff}
+.week-divider .wd-range{font-size:.7rem;color:#8b949e}
+.week-divider .wd-count{background:#58a6ff22;color:#58a6ff;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:600}
+body.light .week-divider{border-bottom-color:#d0d7de}
 </style>
 </head>
 <body>
@@ -285,6 +332,10 @@ body.light .updates-filter .filter-btn.active{background:#8250df11;border-color:
 </table></div>
 <div class="mobile-cards" id="mobileCards"></div>
 <div class="empty" id="empty" style="display:none">No action items found.</div>
+<div class="wins-container" id="winsContainer">
+  <div class="wins-header" id="winsHeader"></div>
+  <div id="winsTimeline"></div>
+</div>
 <div class="updates-container" id="updatesContainer">
   <div class="update-form">
     <div class="form-grid">
@@ -298,6 +349,13 @@ body.light .updates-filter .filter-btn.active{background:#8250df11;border-color:
   <div class="timeline" id="timeline"></div>
 </div>
 <script>
+function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function safeParseJSON(str,fallback){try{return JSON.parse(str)}catch(e){return fallback}}
+var _syncTimer=null;
+function debouncedSync(){if(_syncTimer)clearTimeout(_syncTimer);_syncTimer=setTimeout(function(){_syncTimer=null;syncToCloud()},2000)}
+function uniqueId(){return Date.now()*1000+Math.floor(Math.random()*1000)}
+function normalizeToDay(dateStr){var parts=dateStr.split("-");return new Date(+parts[0],+parts[1]-1,+parts[2])}
+function todayNormalized(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())}
 var EMBEDDED_ITEMS = [
   {
     "id": 1,
@@ -387,7 +445,7 @@ function addSubtask(parentId,task){
   pushUndo();
   var item=items.find(function(i){return i.id===parentId});if(!item)return;
   if(!item.subtasks)item.subtasks=[];
-  item.subtasks.push({id:Date.now(),task:task,progress:"not-started",blockReason:"",completedAt:null,sortOrder:item.subtasks.length});
+  item.subtasks.push({id:uniqueId(),task:task,progress:"not-started",blockReason:"",completedAt:null,sortOrder:item.subtasks.length});
   saveItems();render();
 }
 function deleteSubtask(id){
@@ -430,7 +488,7 @@ function getSubtaskCountHtml(parentId){
 function loadUpdates(){
   var stored=localStorage.getItem(UPDATES_KEY);
   if(stored){
-    var saved=JSON.parse(stored);
+    var saved=safeParseJSON(stored,[]);if(!Array.isArray(saved))saved=[];
     var ver=parseInt(localStorage.getItem(UPDATES_KEY+"_ver"))||0;
     if(EMBEDDED_VERSION>ver){
       var ids=saved.map(function(s){return s.id});
@@ -452,7 +510,7 @@ function addUpdate(){
   var text=document.getElementById("upd-text").value.trim();
   if(!text){alert("Update text is required");return}
   if(!date)date=new Date().toISOString().split("T")[0];
-  updates.push({id:Date.now(),project:proj,date:date,text:text});
+  updates.push({id:uniqueId(),project:proj,date:date,text:text});
   saveUpdates();
   document.getElementById("upd-text").value="";
   renderUpdates();
@@ -462,41 +520,122 @@ function deleteUpdate(id){
   updates=updates.filter(function(u){return u.id!==id});
   saveUpdates();renderUpdates();
 }
+function getWeekKey(dateStr){
+  var d=normalizeToDay(dateStr);
+  var day=d.getDay();var diff=d.getDate()-day+(day===0?-6:1);
+  var mon=new Date(d.getFullYear(),d.getMonth(),diff);
+  return mon.toISOString().split("T")[0];
+}
+function getWeekRange(mondayStr){
+  var m=normalizeToDay(mondayStr);
+  var s=new Date(m);s.setDate(s.getDate()+6);
+  var fmt=function(d){return d.toLocaleDateString("en-US",{month:"short",day:"numeric"})};
+  return fmt(m)+" - "+fmt(s);
+}
+function isCurrentWeek(mondayStr){
+  var today=todayNormalized();
+  return getWeekKey(today.toISOString().split("T")[0])===mondayStr;
+}
 function renderUpdates(){
   var filtered=updatesFilter==="all"?updates:updates.filter(function(u){return u.project===updatesFilter});
   filtered.sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id});
-  // Group by project
-  var groups={};
-  filtered.forEach(function(u){if(!groups[u.project])groups[u.project]=[];groups[u.project].push(u)});
-  // Build filter buttons
   var filterHtml='<button class="filter-btn'+(updatesFilter==="all"?" active":"")+'" data-uf="all">All</button>';
   projects.forEach(function(p){
     var ct=updates.filter(function(u){return u.project===p}).length;
-    if(ct>0)filterHtml+='<button class="filter-btn'+(updatesFilter===p?" active":"")+'" data-uf="'+p+'">'+p+' ('+ct+')</button>';
+    if(ct>0)filterHtml+='<button class="filter-btn'+(updatesFilter===p?" active":"")+'" data-uf="'+esc(p)+'">'+esc(p)+' ('+ct+')</button>';
   });
   document.getElementById("updatesFilter").innerHTML=filterHtml;
-  // Bind filter clicks
   document.querySelectorAll("[data-uf]").forEach(function(btn){
     btn.addEventListener("click",function(){updatesFilter=btn.dataset.uf;renderUpdates()});
   });
-  // Build timeline
+  var weeks={};
+  filtered.forEach(function(u){var wk=getWeekKey(u.date);if(!weeks[wk])weeks[wk]=[];weeks[wk].push(u)});
+  var weekKeys=Object.keys(weeks).sort(function(a,b){return b.localeCompare(a)});
   var html="";
-  var projKeys=Object.keys(groups);
-  if(!projKeys.length){html='<div class="timeline-empty">No updates yet. Add your first project update above.</div>'}
+  if(!weekKeys.length){html='<div class="timeline-empty">No updates yet. Add your first project update above.</div>'}
   else{
-    projKeys.forEach(function(proj){
-      html+='<div class="timeline-group"><div class="timeline-group-header">'+proj+' <span class="count-badge">'+groups[proj].length+' update'+(groups[proj].length>1?"s":"")+'</span></div>';
-      groups[proj].forEach(function(u){
-        var escapedText=u.text.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
-        html+='<div class="timeline-entry"><div class="entry-date">'+u.date+'</div><div class="entry-text">'+escapedText+'</div><button class="entry-delete" onclick="deleteUpdate('+u.id+')" title="Delete">&times;</button></div>';
+    weekKeys.forEach(function(wk){
+      var curr=isCurrentWeek(wk);
+      html+='<div class="week-divider"><span class="wd-label">Week of '+getWeekRange(wk)+'</span>';
+      if(curr)html+='<span class="wh-current">This Week</span>';
+      html+='<span class="wd-count">'+weeks[wk].length+' update'+(weeks[wk].length>1?"s":"")+'</span></div>';
+      weeks[wk].forEach(function(u){
+        var escapedText=esc(u.text).replace(/\n/g,"<br>");
+        html+='<div class="timeline-entry"><div class="entry-date">'+u.date+'<div style="font-size:.65rem;color:#a371f7;margin-top:2px">'+esc(u.project)+'</div></div><div class="entry-text">'+escapedText+'</div><button class="entry-delete" onclick="deleteUpdate('+u.id+')" title="Delete">&times;</button></div>';
+      });
+    });
+  }
+  document.getElementById("timeline").innerHTML=html;
+  var sel=document.getElementById("upd-project");sel.innerHTML="";
+  projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;sel.appendChild(o)});
+}
+function showWinsView(){
+  document.querySelector(".table-wrap").style.display="none";
+  document.querySelector(".add-form").classList.remove("open");
+  document.getElementById("empty").style.display="none";
+  document.querySelector(".summary").style.display="none";
+  document.querySelector(".controls").style.display="none";
+  document.getElementById("updatesContainer").classList.remove("open");
+  document.getElementById("winsContainer").classList.add("open");
+  renderWins();
+}
+function hideWinsView(){
+  document.getElementById("winsContainer").classList.remove("open");
+}
+function renderWins(){
+  var done=items.filter(function(i){return i.progress==="done"&&i.completedAt});
+  done.sort(function(a,b){return b.completedAt.localeCompare(a.completedAt)});
+  var thisWeekKey=getWeekKey(todayNormalized().toISOString().split("T")[0]);
+  var thisWeekCount=done.filter(function(i){return getWeekKey(i.completedAt.split("T")[0])===thisWeekKey}).length;
+  var totalDone=done.length;
+  var streak=0;
+  var checkWeek=new Date(todayNormalized());
+  while(true){
+    var wk=getWeekKey(checkWeek.toISOString().split("T")[0]);
+    var ct=done.filter(function(i){return getWeekKey(i.completedAt.split("T")[0])===wk}).length;
+    if(ct>0){streak++;checkWeek.setDate(checkWeek.getDate()-7)}else break;
+  }
+  var hdrHtml='<div class="wins-stat"><div class="ws-val">'+thisWeekCount+'</div><div class="ws-lbl">This Week</div></div>';
+  hdrHtml+='<div class="wins-stat"><div class="ws-val">'+totalDone+'</div><div class="ws-lbl">All Time</div></div>';
+  hdrHtml+='<div class="wins-stat streak"><div class="ws-val">'+streak+'w</div><div class="ws-lbl">Streak</div></div>';
+  document.getElementById("winsHeader").innerHTML=hdrHtml;
+  var weeks={};
+  done.forEach(function(i){var wk=getWeekKey(i.completedAt.split("T")[0]);if(!weeks[wk])weeks[wk]=[];weeks[wk].push(i)});
+  var weekKeys=Object.keys(weeks).sort(function(a,b){return b.localeCompare(a)});
+  var html="";
+  if(!weekKeys.length){
+    html='<div class="wins-empty"><div class="wins-empty-icon">&#127942;</div>Complete your first task to see it here!</div>';
+  } else {
+    weekKeys.forEach(function(wk){
+      var curr=isCurrentWeek(wk);
+      html+='<div class="week-section"><div class="week-header"><span class="wh-label">Week of '+getWeekRange(wk)+'</span>';
+      if(curr)html+='<span class="wh-current">This Week</span>';
+      html+='<span class="wh-count">'+weeks[wk].length+' completed</span></div>';
+      weeks[wk].forEach(function(i){
+        var addedStr=i.dateAdded?i.dateAdded:"unknown";
+        var doneDate=new Date(i.completedAt);
+        var doneStr=doneDate.toLocaleDateString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+        var dur="";
+        if(i.dateAdded){
+          var diffMs=doneDate-normalizeToDay(i.dateAdded);
+          var days=Math.round(diffMs/(1000*60*60*24));
+          dur=days<=0?"same day":days===1?"1 day":days+" days";
+        }
+        html+='<div class="win-card">';
+        html+='<div class="win-check">&#10003;</div>';
+        html+='<div class="win-body">';
+        html+='<div class="win-task">'+esc(i.task)+'</div>';
+        html+='<div class="win-meta">';
+        html+='<span class="project-badge">'+esc(i.project)+'</span>';
+        html+='<span class="win-added">Added '+addedStr+'</span>';
+        html+='<span>Done '+doneStr+'</span>';
+        if(dur)html+='<span class="win-duration">'+dur+'</span>';
+        html+='</div></div></div>';
       });
       html+='</div>';
     });
   }
-  document.getElementById("timeline").innerHTML=html;
-  // Populate update form project dropdown
-  var sel=document.getElementById("upd-project");sel.innerHTML="";
-  projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;sel.appendChild(o)});
+  document.getElementById("winsTimeline").innerHTML=html;
 }
 function showUpdatesView(){
   document.querySelector(".table-wrap").style.display="none";
@@ -504,6 +643,7 @@ function showUpdatesView(){
   document.getElementById("empty").style.display="none";
   document.querySelector(".summary").style.display="none";
   document.querySelector(".controls").style.display="none";
+  document.getElementById("winsContainer").classList.remove("open");
   document.getElementById("updatesContainer").classList.add("open");
   document.getElementById("upd-date").value=new Date().toISOString().split("T")[0];
   renderUpdates();
@@ -536,14 +676,15 @@ function migrateItem(item){
 }
 function loadProjects(){
   var s=localStorage.getItem(PROJECTS_KEY);
-  if(s){var arr=JSON.parse(s);return arr.filter(function(p,i){return arr.indexOf(p)===i&&p!=="__updates__"&&p!=="asd"&&p!=="LT8460 Die Rev"})}
+  if(s){var arr=safeParseJSON(s,[]);if(!Array.isArray(arr))arr=[];return arr.filter(function(p,i){return typeof p==="string"&&arr.indexOf(p)===i&&p!=="__updates__"&&p!=="asd"&&p!=="LT8460 Die Rev"})}
   return DEFAULT_PROJECTS.slice();
 }
 function saveProjectsList(){localStorage.setItem(PROJECTS_KEY,JSON.stringify(projects))}
 function loadItems(){
   var stored=localStorage.getItem(STORAGE_KEY);
   if(stored){
-    var saved=JSON.parse(stored).map(migrateItem);
+    var raw=safeParseJSON(stored,[]);if(!Array.isArray(raw))raw=[];
+    var saved=raw.map(migrateItem);
     var ver=parseInt(localStorage.getItem(STORAGE_KEY+"_ver"))||0;
     if(EMBEDDED_VERSION>ver){
       var ids=saved.map(function(s){return s.id});
@@ -563,13 +704,13 @@ function pushUndo(){undoStack.push(JSON.stringify(items));if(undoStack.length>MA
 function getStatus(item){
   if(item.progress==="done")return"done";
   if(item.progress==="blocked")return"blocked";
-  if(item.dueDate&&new Date(item.dueDate)<new Date()&&item.progress!=="done")return"overdue";
+  if(item.dueDate&&normalizeToDay(item.dueDate)<todayNormalized()&&item.progress!=="done")return"overdue";
   if(item.progress==="in-progress")return"in-progress";
   return"not-started";
 }
 function getDueClass(item){
   if(!item.dueDate||item.progress==="done")return"";
-  var diff=(new Date(item.dueDate)-new Date())/(1000*60*60*24);
+  var diff=(normalizeToDay(item.dueDate)-todayNormalized())/(1000*60*60*24);
   if(diff<0)return"due-overdue";if(diff<=3)return"due-warning";return"";
 }
 function cycleProgress(id){
@@ -642,15 +783,15 @@ function render(){
     h+='<td><button class="expand-btn" id="exp-'+i.id+'" onclick="toggleNotes('+i.id+')">&rsaquo;</button></td>';
     h+='<td><input type="checkbox" class="checkbox" '+checked+' onchange="toggleItem('+i.id+')"></td>';
     h+='<td>'+(idx+1)+'</td>';
-    h+='<td><span class="project-badge">'+i.project+'</span></td>';
-    h+='<td class="task-cell"><span class="priority '+pClass+'"></span><span class="task-text">'+i.task+'</span>';
+    h+='<td><span class="project-badge">'+esc(i.project)+'</span></td>';
+    h+='<td class="task-cell"><span class="priority '+pClass+'"></span><span class="task-text">'+esc(i.task)+'</span>';
     h+=getSubtaskCountHtml(i.id);
     h+='<div class="progress-container" onclick="cycleProgress('+i.id+')" title="Click to cycle: Not Started > In Progress > Blocked > Done"><div class="progress-fill '+i.progress+'"></div></div>';
     h+='<div class="progress-label"><span class="stage '+i.progress+'">'+STAGE_LABELS[i.progress]+'</span></div>';
     h+=getBlockHtml(i)+ct+'</td>';
-    h+='<td>'+i.owner+'</td>';
+    h+='<td>'+esc(i.owner)+'</td>';
     h+='<td class="'+dueClass+'">'+(i.dueDate||"-")+'</td>';
-    h+='<td>'+(i.source||"-")+'</td>';
+    h+='<td>'+esc(i.source||"-")+'</td>';
     h+='<td><button class="add-sub-btn" onclick="toggleSubtaskExpand('+i.id+')" title="Sub-tasks">+sub</button> <button class="edit-btn" onclick="editItem('+i.id+')" title="Edit">&#9998;</button> <button class="delete-btn" onclick="deleteItem('+i.id+')" title="Delete">&times;</button></td>';
     h+='</tr>';
     h+='<tr class="notes-row" id="notes-'+i.id+'"><td colspan="10"><textarea class="notes-textarea" id="note-text-'+i.id+'" placeholder="Add notes...">'+(i.notes||"")+'</textarea></td></tr>';
@@ -670,7 +811,7 @@ function render(){
         h+='<td><input type="checkbox" class="subtask-checkbox" '+stChecked+' onchange="toggleSubtask('+st.id+')"></td>';
         h+='<td style="color:#484f58;font-size:.7rem">'+(idx+1)+'.'+(si+1)+'</td>';
         h+='<td></td>';
-        h+='<td><span class="subtask-task">'+st.task+'</span>';
+        h+='<td><span class="subtask-task">'+esc(st.task)+'</span>';
         h+='<div class="subtask-progress" onclick="cycleSubtaskProgress('+st.id+')" title="Click to cycle"><div class="subtask-progress-fill" style="width:'+stFillW+';background:'+stColor+'"></div></div>';
         h+='<span class="subtask-stage" style="color:'+stColor+'">'+STAGE_LABELS[st.progress]+'</span>';
         if(st.progress==="blocked")h+='<input class="block-input" id="block-input-sub-'+st.id+'" value="'+(st.blockReason||"").replace(/"/g,"&quot;")+'" placeholder="Reason..." style="max-width:200px">';
@@ -708,7 +849,7 @@ function render(){
   var ns=all.filter(function(i){return i.progress==="not-started"}).length;
   var ip=all.filter(function(i){return i.progress==="in-progress"}).length;
   var bl=all.filter(function(i){return i.progress==="blocked"}).length;
-  var od=all.filter(function(i){return i.dueDate&&new Date(i.dueDate)<new Date()&&i.progress!=="done"}).length;
+  var od=all.filter(function(i){return i.dueDate&&normalizeToDay(i.dueDate)<todayNormalized()&&i.progress!=="done"}).length;
   var dn=all.filter(function(i){return i.progress==="done"}).length;
   document.getElementById("summary").innerHTML='<div class="card notstarted"><div class="card-value">'+ns+'</div><div class="card-label">Not Started</div></div><div class="card inprog"><div class="card-value">'+ip+'</div><div class="card-label">In Progress</div></div><div class="card blocked"><div class="card-value">'+bl+'</div><div class="card-label">Blocked</div></div><div class="card overdue"><div class="card-value">'+od+'</div><div class="card-label">Overdue</div></div><div class="card done"><div class="card-value">'+dn+'</div><div class="card-label">Done</div></div>';
   // Mobile cards render
@@ -729,14 +870,14 @@ function renderMobileCards(filtered){
     var blockText=i.progress==="blocked"&&i.blockReason?" - "+i.blockReason:"";
     mh+='<div class="mobile-card '+mcClass+'" data-id="'+i.id+'">';
     mh+='<div class="mobile-card-header">';
-    mh+='<div class="mobile-card-title"><span class="priority '+pDot+'"></span><span class="task-text-m">'+(i.progress==="done"?"<s>"+i.task+"</s>":i.task)+'</span></div>';
-    mh+='<span class="project-badge">'+i.project+'</span>';
+    mh+='<div class="mobile-card-title"><span class="priority '+pDot+'"></span><span class="task-text-m">'+(i.progress==="done"?"<s>"+esc(i.task)+"</s>":esc(i.task))+'</span></div>';
+    mh+='<span class="project-badge">'+esc(i.project)+'</span>';
     mh+='</div>';
     mh+='<div class="mobile-card-meta">';
-    mh+='<span>'+i.owner+'</span>';
+    mh+='<span>'+esc(i.owner)+'</span>';
     mh+='<span class="'+dueClass+'">Due: '+dueStr+'</span>';
     if(subs.length)mh+='<span class="subtask-count'+(subsDone===subs.length?" complete":"")+'">'+subsDone+'/'+subs.length+'</span>';
-    if(i.source)mh+='<span>'+i.source+'</span>';
+    if(i.source)mh+='<span>'+esc(i.source)+'</span>';
     mh+='</div>';
     mh+='<div class="mobile-card-progress">';
     mh+='<div class="progress-container" onclick="cycleProgress('+i.id+')"><div class="progress-fill '+i.progress+'"></div></div>';
@@ -757,7 +898,7 @@ function renderMobileCards(filtered){
         var stDoneClass=st.progress==="done"?"ms-done":"";
         mh+='<div class="mobile-subtask '+stDoneClass+'" onclick="cycleSubtaskProgress('+st.id+')">';
         mh+='<input type="checkbox" class="subtask-checkbox" '+(st.progress==="done"?"checked":"")+' onchange="event.stopPropagation();toggleSubtask('+st.id+')">';
-        mh+='<span class="ms-text">'+st.task+'</span>';
+        mh+='<span class="ms-text">'+esc(st.task)+'</span>';
         mh+='<div class="ms-prog"><div class="ms-prog-fill" style="width:'+stW+';background:'+stColor+'"></div></div>';
         mh+='</div>';
       });
@@ -778,7 +919,7 @@ function addProjectToUI(name){
   btn.className="tab";btn.dataset.filter=name;btn.textContent=name;btn.setAttribute("draggable","true");
   btn.addEventListener("click",function(){
     document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
-    btn.classList.add("active");currentFilter=name;hideUpdatesView();render();
+    btn.classList.add("active");currentFilter=name;hideUpdatesView();hideWinsView();render();
   });
   tabs.insertBefore(btn,addBtn);
   var sel=document.getElementById("f-project");
@@ -793,7 +934,7 @@ function populateProjectDropdown(){
 projects=loadProjects();
 items=loadItems();
 projects.forEach(function(p){addProjectToUI(p)});
-// Add Updates tab
+// Add Updates + Wins tabs
 (function(){
   var tabs=document.getElementById("tabs");
   var addBtn=document.getElementById("addProjectBtn");
@@ -802,10 +943,18 @@ projects.forEach(function(p){addProjectToUI(p)});
   updTab.style.borderColor="#a371f7";updTab.style.color="#a371f7";
   updTab.addEventListener("click",function(){
     document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
-    updTab.classList.add("active");currentFilter="__updates__";showUpdatesView();
+    updTab.classList.add("active");currentFilter="__updates__";hideWinsView();showUpdatesView();
+  });
+  var winsTab=document.createElement("button");
+  winsTab.className="tab";winsTab.dataset.filter="__wins__";winsTab.textContent="\u2728 Wins";
+  winsTab.style.borderColor="#3fb950";winsTab.style.color="#3fb950";
+  winsTab.addEventListener("click",function(){
+    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
+    winsTab.classList.add("active");currentFilter="__wins__";hideUpdatesView();showWinsView();
   });
   var firstProjTab=tabs.querySelector('.tab:not([data-filter="all"])');
-  if(firstProjTab)tabs.insertBefore(updTab,firstProjTab);else tabs.insertBefore(updTab,addBtn);
+  if(firstProjTab){tabs.insertBefore(winsTab,firstProjTab);tabs.insertBefore(updTab,winsTab)}
+  else{tabs.insertBefore(updTab,addBtn);tabs.insertBefore(winsTab,addBtn)}
 })();
 updates=loadUpdates();
 document.getElementById("submitUpdate").addEventListener("click",addUpdate);
@@ -828,7 +977,7 @@ document.getElementById("addBtn").addEventListener("click",function(){document.g
 document.getElementById("submitBtn").addEventListener("click",function(){
   var task=document.getElementById("f-task").value.trim();if(!task){alert("Task is required");return}
   pushUndo();
-  items.push(migrateItem({id:Date.now(),project:document.getElementById("f-project").value,task:task,owner:document.getElementById("f-owner").value||"MB",dueDate:document.getElementById("f-due").value||"",priority:document.getElementById("f-priority").value,status:"Open",progress:"not-started",source:document.getElementById("f-source").value||"",notes:document.getElementById("f-notes").value||"",dateAdded:new Date().toISOString().split("T")[0],completedAt:null,blockReason:"",sortOrder:items.length}));
+  items.push(migrateItem({id:uniqueId(),project:document.getElementById("f-project").value,task:task,owner:document.getElementById("f-owner").value||"MB",dueDate:document.getElementById("f-due").value||"",priority:document.getElementById("f-priority").value,status:"Open",progress:"not-started",source:document.getElementById("f-source").value||"",notes:document.getElementById("f-notes").value||"",dateAdded:new Date().toISOString().split("T")[0],completedAt:null,blockReason:"",sortOrder:items.length}));
   saveItems();document.getElementById("f-task").value="";document.getElementById("f-due").value="";document.getElementById("f-source").value="";document.getElementById("f-notes").value="";document.getElementById("addForm").classList.remove("open");render();
 });
 document.getElementById("addProjectBtn").addEventListener("click",function(){document.getElementById("projectModal").classList.add("open")});
@@ -872,7 +1021,7 @@ document.addEventListener("input",function(e){
 (function(){
   var tabs=document.getElementById("tabs");var dragTab=null;
   tabs.addEventListener("dragstart",function(e){
-    var tab=e.target.closest(".tab");if(!tab||tab.dataset.filter==="all"){e.preventDefault();return}
+    var tab=e.target.closest(".tab");if(!tab||tab.dataset.filter==="all"||tab.dataset.filter==="__updates__"||tab.dataset.filter==="__wins__"){e.preventDefault();return}
     dragTab=tab;tab.style.opacity="0.4";
   });
   tabs.addEventListener("dragend",function(){if(dragTab){dragTab.style.opacity="1";dragTab=null}});
@@ -885,14 +1034,14 @@ document.addEventListener("input",function(e){
     e.preventDefault();var tab=e.target.closest(".tab");if(tab)tab.style.borderLeft="";
     if(!tab||!dragTab||tab===dragTab)return;
     tabs.insertBefore(dragTab,tab);
-    var newOrder=[];tabs.querySelectorAll(".tab").forEach(function(t){if(t.dataset.filter&&t.dataset.filter!=="all")newOrder.push(t.dataset.filter)});
+    var newOrder=[];tabs.querySelectorAll(".tab").forEach(function(t){if(t.dataset.filter&&t.dataset.filter!=="all"&&t.dataset.filter!=="__updates__"&&t.dataset.filter!=="__wins__")newOrder.push(t.dataset.filter)});
     projects=newOrder;saveProjectsList();
   });
 })();
 
 // Right-click to remove project tab
 document.getElementById("tabs").addEventListener("contextmenu",function(e){
-  var tab=e.target.closest(".tab");if(!tab||tab.dataset.filter==="all")return;
+  var tab=e.target.closest(".tab");if(!tab||tab.dataset.filter==="all"||tab.dataset.filter==="__updates__"||tab.dataset.filter==="__wins__")return;
   e.preventDefault();var name=tab.dataset.filter;
   if(confirm("Remove project tab '"+name+"'? (Items under it won't be deleted)")){
     projects=projects.filter(function(p){return p!==name});saveProjectsList();tab.remove();
@@ -904,7 +1053,7 @@ document.getElementById("tabs").addEventListener("contextmenu",function(e){
 
 document.querySelector('.tab[data-filter="all"]').addEventListener("click",function(){
   document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
-  this.classList.add("active");currentFilter="all";hideUpdatesView();render();
+  this.classList.add("active");currentFilter="all";hideUpdatesView();hideWinsView();render();
 });
 
 // === Google Sheets Sync ===
@@ -936,12 +1085,11 @@ function loadFromCloud() {
     .then(function(d) {
       var changed = false;
       if (d.items && d.items.length > 0) {
-        // Fix dates from Google Sheets (converts to ISO timestamps)
         d.items.forEach(function(item) {
           if (item.dueDate) item.dueDate = fixDate(item.dueDate);
           if (item.dateAdded) item.dateAdded = fixDate(item.dateAdded);
           if (item.subtasksJson){try{item.subtasks=JSON.parse(item.subtasksJson)}catch(e){item.subtasks=[]}delete item.subtasksJson}
-          if (!item.subtasks) item.subtasks=[];
+          migrateItem(item);
         });
         var cloudIds = d.items.map(function(i) { return i.id; });
         var localOnly = items.filter(function(i) { return cloudIds.indexOf(i.id) === -1; });
@@ -969,13 +1117,13 @@ function loadFromCloud() {
     .catch(function(e) { console.warn("Cloud load failed, using local:", e); });
 }
 
-// Wrap save functions to also sync
+// Wrap save functions to also sync (debounced to avoid hammering the endpoint)
 var _origSaveItems = saveItems;
-saveItems = function() { _origSaveItems(); syncToCloud(); };
+saveItems = function() { _origSaveItems(); debouncedSync(); };
 var _origSaveUpdates = saveUpdates;
-saveUpdates = function() { _origSaveUpdates(); syncToCloud(); };
+saveUpdates = function() { _origSaveUpdates(); debouncedSync(); };
 var _origSaveProjectsList = saveProjectsList;
-saveProjectsList = function() { _origSaveProjectsList(); syncToCloud(); };
+saveProjectsList = function() { _origSaveProjectsList(); debouncedSync(); };
 
 
 // Sync button click
