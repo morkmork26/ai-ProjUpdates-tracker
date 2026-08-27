@@ -474,7 +474,7 @@ body.light .filter-pill.add-ai{border-color:#2da44e;color:#2da44e}
   <button class="filter-pill add-ai" id="addBtn">+ Add AI</button>
   <button class="filter-pill" id="toggleWeek">This Week</button>
   <button class="filter-pill" id="toggleMine">My AIs</button>
-  <button class="filter-pill" id="toggleDone">Hide Done</button>
+
   <button class="filter-pill" id="toggleSelect">Select</button>
   <button class="filter-pill" id="toggleSort">Manual Order</button>
   <span class="filter-pill" id="archivedIndicator" style="display:none;cursor:pointer"></span>
@@ -1050,7 +1050,7 @@ function hideUpdatesView(){
 }
 var MY_NAMES = ["mb","mark","lester","mark lester"];
 var undoStack = [], redoStack = [], MAX_UNDO = 20;
-var hideDone = false, manualSort = false, showMineOnly = false;
+var hideDone = true, manualSort = false, showMineOnly = false;
 var currentFilter = "all", sortCol = "dueDate", sortAsc = true, dragId = null;
 var items = [], projects = [];
 var searchQuery = "", thisWeekMode = false, boardView = false, selectMode = false, showArchived = false;
@@ -1176,7 +1176,7 @@ function render(){
   if(!showArchived&&!thisWeekMode)filtered=filtered.filter(function(i){return!isArchivedItem(i)});
   var archCount=getArchivedCount();
   var archEl=document.getElementById("archivedIndicator");
-  if(archCount>0&&!hideDone){archEl.style.display="inline-flex";archEl.innerHTML=(showArchived?"Hide":"Show")+' <span class="archived-badge">'+archCount+' archived</span>'}
+  if(archCount>0){archEl.style.display="inline-flex";archEl.innerHTML=(showArchived?"Hide":"Show")+' <span class="archived-badge">'+archCount+' archived</span>'}
   else{archEl.style.display="none"}
   if(manualSort)filtered.sort(function(a,b){return(a.sortOrder||0)-(b.sortOrder||0)});
   else filtered.sort(function(a,b){var va=a[sortCol]||"",vb=b[sortCol]||"";if(sortCol==="id"){va=+va;vb=+vb};return sortAsc?(va>vb?1:-1):(va<vb?1:-1)});
@@ -1347,7 +1347,7 @@ document.getElementById("lastUpdate").textContent=new Date().toLocaleDateString(
 document.querySelectorAll("th[data-sort]").forEach(function(th){th.addEventListener("click",function(){
   if(manualSort)return;var col=th.dataset.sort;if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true};render();
 })});
-document.getElementById("toggleDone").addEventListener("click",function(){hideDone=!hideDone;this.textContent=hideDone?"Show Done":"Hide Done";this.classList.toggle("active",hideDone);render()});
+
 document.getElementById("toggleSort").addEventListener("click",function(){manualSort=!manualSort;this.textContent=manualSort?"Column Sort":"Manual Order";this.classList.toggle("active",manualSort);render()});
 document.getElementById("toggleMine").addEventListener("click",function(){showMineOnly=!showMineOnly;this.textContent=showMineOnly?"All AIs":"My AIs";this.classList.toggle("active",showMineOnly);render()});
 document.getElementById("toggleTheme").addEventListener("click",function(){var c=localStorage.getItem(THEME_KEY)||"dark";var n=c==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,n);applyTheme(n)});
