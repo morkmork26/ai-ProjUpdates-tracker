@@ -286,7 +286,7 @@ body.light .search-input{background:#fff;border-color:#d0d7de;color:#1f2328}
 .kanban-container{display:none;animation:slideDown .3s ease}
 .kanban-container.open{display:block}
 .kanban-board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:16px}
-.kanban-col{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:12px;min-height:300px}
+.kanban-col{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:12px;min-height:300px;overflow:hidden}
 .kanban-col-header{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 12px;border-radius:8px;margin-bottom:12px;text-align:center}
 .kanban-col-header.kh-not-started{background:#8b949e22;color:#8b949e}
 .kanban-col-header.kh-in-progress{background:#58a6ff22;color:#58a6ff}
@@ -297,7 +297,7 @@ body.light .search-input{background:#fff;border-color:#d0d7de;color:#1f2328}
 .kanban-card.dragging{opacity:.4;transform:scale(.95)}
 .kanban-col.drag-over{background:#58a6ff11;border-color:#58a6ff;box-shadow:inset 0 0 20px rgba(88,166,255,.1)}
 .kanban-card .kc-project{margin-bottom:6px}
-.kanban-card .kc-task{font-size:.82rem;font-weight:600;color:#c9d1d9;margin-bottom:8px;line-height:1.3}
+.kanban-card .kc-task{font-size:.82rem;font-weight:600;color:#c9d1d9;margin-bottom:8px;line-height:1.3;overflow-wrap:break-word;word-break:break-word}
 .kanban-card .kc-meta{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:#8b949e}
 .kanban-card .kc-due{font-size:.7rem}
 .kanban-card .kc-priority{position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%}
