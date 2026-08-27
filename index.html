@@ -1266,7 +1266,7 @@ document.getElementById("toggleMine").addEventListener("click",function(){showMi
 document.getElementById("toggleTheme").addEventListener("click",function(){var c=localStorage.getItem(THEME_KEY)||"dark";var n=c==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,n);applyTheme(n)});
 document.getElementById("undoBtn").addEventListener("click",function(){if(!undoStack.length){alert("Nothing to undo");return};redoStack.push(JSON.stringify(items));items=JSON.parse(undoStack.pop());saveItems();render()});
 document.getElementById("redoBtn").addEventListener("click",function(){if(!redoStack.length){alert("Nothing to redo");return};undoStack.push(JSON.stringify(items));items=JSON.parse(redoStack.pop());saveItems();render()});
-document.getElementById("addBtn").addEventListener("click",function(){document.getElementById("addForm").classList.toggle("open")});
+document.getElementById("addBtn").addEventListener("click",function(){document.getElementById("addForm").classList.toggle("open");var sel=document.getElementById("f-project");if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0){sel.value=currentFilter}});
 document.getElementById("submitBtn").addEventListener("click",function(){
   var task=document.getElementById("f-task").value.trim();if(!task){alert("Task is required");return}
   pushUndo();
@@ -1482,6 +1482,7 @@ document.addEventListener("keydown",function(e){
   if((e.ctrlKey||e.metaKey)&&e.key==="n"){
     e.preventDefault();
     document.getElementById("addForm").classList.add("open");
+    var sel=document.getElementById("f-project");if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0){sel.value=currentFilter}
     setTimeout(function(){document.getElementById("f-task").focus()},100);
   }
   if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){
