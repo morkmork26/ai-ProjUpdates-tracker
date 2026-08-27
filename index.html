@@ -334,6 +334,7 @@ body.light .week-divider{border-bottom-color:#d0d7de}
 <div class="empty" id="empty" style="display:none">No action items found.</div>
 <div class="wins-container" id="winsContainer">
   <div class="wins-header" id="winsHeader"></div>
+  <div class="updates-filter" id="winsFilter"></div>
   <div id="winsTimeline"></div>
 </div>
 <div class="updates-container" id="updatesContainer">
@@ -434,6 +435,7 @@ var EMBEDDED_UPDATES = [];
 var UPDATES_KEY = "ai_tracker_updates";
 var updates = [];
 var updatesFilter = "all";
+var winsFilter = "all";
 var expandedSubtasks = {};
 
 function getSubtasksForItem(parentId){
@@ -584,7 +586,17 @@ function hideWinsView(){
 }
 function renderWins(){
   var done=items.filter(function(i){return i.progress==="done"&&i.completedAt});
+  if(winsFilter!=="all")done=done.filter(function(i){return i.project===winsFilter});
   done.sort(function(a,b){return b.completedAt.localeCompare(a.completedAt)});
+  var filterHtml='<button class="filter-btn'+(winsFilter==="all"?" active":"")+'" data-wf="all">All</button>';
+  projects.forEach(function(p){
+    var ct=items.filter(function(i){return i.progress==="done"&&i.completedAt&&i.project===p}).length;
+    if(ct>0)filterHtml+='<button class="filter-btn'+(winsFilter===p?" active":"")+'" data-wf="'+esc(p)+'">'+esc(p)+' ('+ct+')</button>';
+  });
+  document.getElementById("winsFilter").innerHTML=filterHtml;
+  document.querySelectorAll("[data-wf]").forEach(function(btn){
+    btn.addEventListener("click",function(){winsFilter=btn.dataset.wf;renderWins()});
+  });
   var thisWeekKey=getWeekKey(todayNormalized().toISOString().split("T")[0]);
   var thisWeekCount=done.filter(function(i){return getWeekKey(i.completedAt.split("T")[0])===thisWeekKey}).length;
   var totalDone=done.length;
@@ -946,7 +958,7 @@ projects.forEach(function(p){addProjectToUI(p)});
     updTab.classList.add("active");currentFilter="__updates__";hideWinsView();showUpdatesView();
   });
   var winsTab=document.createElement("button");
-  winsTab.className="tab";winsTab.dataset.filter="__wins__";winsTab.textContent="\u2728 Wins";
+  winsTab.className="tab";winsTab.dataset.filter="__wins__";winsTab.textContent="Completed";
   winsTab.style.borderColor="#3fb950";winsTab.style.color="#3fb950";
   winsTab.addEventListener("click",function(){
     document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});
