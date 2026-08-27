@@ -283,8 +283,10 @@ body.light .search-input{background:#fff;border-color:#d0d7de;color:#1f2328}
 .kanban-col-header.kh-in-progress{background:#58a6ff22;color:#58a6ff}
 .kanban-col-header.kh-blocked{background:#d2992222;color:#d29922}
 .kanban-col-header.kh-done{background:#3fb95022;color:#3fb950}
-.kanban-card{background:#0d1117;border:1px solid #30363d;border-radius:10px;padding:12px;margin-bottom:10px;transition:transform .2s,box-shadow .2s;cursor:default;position:relative}
+.kanban-card{background:#0d1117;border:1px solid #30363d;border-radius:10px;padding:12px;margin-bottom:10px;transition:transform .2s,box-shadow .2s;cursor:grab;position:relative}
 .kanban-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.kanban-card.dragging{opacity:.4;transform:scale(.95)}
+.kanban-col.drag-over{background:#58a6ff11;border-color:#58a6ff;box-shadow:inset 0 0 20px rgba(88,166,255,.1)}
 .kanban-card .kc-project{margin-bottom:6px}
 .kanban-card .kc-task{font-size:.82rem;font-weight:600;color:#c9d1d9;margin-bottom:8px;line-height:1.3}
 .kanban-card .kc-meta{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:#8b949e}
@@ -641,12 +643,12 @@ function renderKanban(){
   var html="";
   STAGES.forEach(function(stage){
     var stColor=stage==="done"?"#3fb950":stage==="in-progress"?"#58a6ff":stage==="blocked"?"#d29922":"#8b949e";
-    html+='<div class="kanban-col"><div class="kanban-col-header kh-'+stage+'">'+STAGE_LABELS[stage]+' ('+cols[stage].length+')</div>';
+    html+='<div class="kanban-col" data-stage="'+stage+'"><div class="kanban-col-header kh-'+stage+'">'+STAGE_LABELS[stage]+' ('+cols[stage].length+')</div>';
     cols[stage].forEach(function(i){
       var pDot=i.priority==="High"?"background:#f85149":i.priority==="Low"?"background:#484f58":"background:#d29922";
       var dueText=formatRelativeDate(i.dueDate);
       var dueClass=getDueClass(i);
-      html+='<div class="kanban-card" data-id="'+i.id+'">';
+      html+='<div class="kanban-card" draggable="true" data-id="'+i.id+'">';
       html+='<div class="kc-priority" style="'+pDot+'"></div>';
       html+='<div class="kc-project"><span class="project-badge">'+esc(i.project)+'</span></div>';
       html+='<div class="kc-task">'+esc(i.task)+'</div>';
@@ -656,6 +658,31 @@ function renderKanban(){
     html+='</div>';
   });
   document.getElementById("kanbanBoard").innerHTML=html;
+  // Drag and drop between columns
+  var board=document.getElementById("kanbanBoard");
+  var dragCardId=null;
+  board.querySelectorAll(".kanban-card").forEach(function(card){
+    card.addEventListener("dragstart",function(){dragCardId=+card.dataset.id;card.classList.add("dragging")});
+    card.addEventListener("dragend",function(){card.classList.remove("dragging");dragCardId=null});
+  });
+  board.querySelectorAll(".kanban-col").forEach(function(col){
+    col.addEventListener("dragover",function(e){e.preventDefault();col.classList.add("drag-over")});
+    col.addEventListener("dragleave",function(){col.classList.remove("drag-over")});
+    col.addEventListener("drop",function(e){
+      e.preventDefault();col.classList.remove("drag-over");
+      if(dragCardId===null)return;
+      var targetStage=col.dataset.stage;
+      var item=items.find(function(i){return i.id===dragCardId});
+      if(!item||item.progress===targetStage)return;
+      pushUndo();
+      var fromStage=item.progress;
+      item.progress=targetStage;
+      if(targetStage==="done"){item.completedAt=new Date().toISOString()}else{item.completedAt=null}
+      if(targetStage!=="blocked")item.blockReason="";
+      logActivity(item.id,item.task,item.project,fromStage,targetStage);
+      saveItems();renderKanban();
+    });
+  });
 }
 function renderActivity(){
   var log=loadActivity();
