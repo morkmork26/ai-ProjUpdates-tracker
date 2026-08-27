@@ -447,9 +447,6 @@ body.light .filter-pill.add-ai{border-color:#2da44e;color:#2da44e}
   <div class="overflow-wrap">
     <button class="overflow-btn" id="overflowBtn" title="More actions">&#8943;</button>
     <div class="overflow-dropdown" id="overflowDropdown">
-      <button id="undoBtn"><span class="od-icon">&#8617;</span>Undo</button>
-      <button id="redoBtn"><span class="od-icon">&#8618;</span>Redo</button>
-      <button id="syncBtn"><span class="od-icon">&#9729;</span>Sync</button>
       <button id="toggleTheme"><span class="od-icon">&#9790;</span>Toggle Theme</button>
     </div>
   </div>
@@ -1354,8 +1351,7 @@ document.getElementById("toggleDone").addEventListener("click",function(){hideDo
 document.getElementById("toggleSort").addEventListener("click",function(){manualSort=!manualSort;this.textContent=manualSort?"Column Sort":"Manual Order";this.classList.toggle("active",manualSort);render()});
 document.getElementById("toggleMine").addEventListener("click",function(){showMineOnly=!showMineOnly;this.textContent=showMineOnly?"All AIs":"My AIs";this.classList.toggle("active",showMineOnly);render()});
 document.getElementById("toggleTheme").addEventListener("click",function(){var c=localStorage.getItem(THEME_KEY)||"dark";var n=c==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,n);applyTheme(n)});
-document.getElementById("undoBtn").addEventListener("click",function(){if(!undoStack.length){alert("Nothing to undo");return};redoStack.push(JSON.stringify(items));items=JSON.parse(undoStack.pop());saveItems();render()});
-document.getElementById("redoBtn").addEventListener("click",function(){if(!redoStack.length){alert("Nothing to redo");return};undoStack.push(JSON.stringify(items));items=JSON.parse(redoStack.pop());saveItems();render()});
+
 document.getElementById("addBtn").addEventListener("click",function(){document.getElementById("addForm").classList.toggle("open");var sel=document.getElementById("f-project");if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0){sel.value=currentFilter}});
 document.getElementById("submitBtn").addEventListener("click",function(){
   var task=document.getElementById("f-task").value.trim();if(!task){alert("Task is required");return}
@@ -1447,7 +1443,7 @@ function syncToCloud() {
   if (syncInProgress) return;
   syncInProgress = true;
   var btn = document.getElementById("syncBtn");
-  if (btn) btn.innerHTML = '<span class="od-icon">&#8987;</span>Syncing...';
+  if (btn) btn.innerHTML = 'Syncing...';
   var itemsForCloud = items.map(function(i){var c=JSON.parse(JSON.stringify(i));c.subtasksJson=JSON.stringify(c.subtasks||[]);delete c.subtasks;return c});
   var payload = {action: "save", app: "ai", data: {items: itemsForCloud, updates: updates, projects: projects}};
   fetch(SCRIPT_URL, {method: "POST", body: JSON.stringify(payload), headers: {"Content-Type": "text/plain"}})
@@ -1503,8 +1499,7 @@ var _origSaveProjectsList = saveProjectsList;
 saveProjectsList = function() { _origSaveProjectsList(); debouncedSync(); };
 
 
-// Sync button click
-document.getElementById("syncBtn").addEventListener("click", function() { syncToCloud(); });
+
 
 // Load from cloud on startup
 loadFromCloud();
