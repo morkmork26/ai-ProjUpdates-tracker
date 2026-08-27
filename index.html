@@ -152,7 +152,8 @@ tr.drag-over td{border-top:2px solid #58a6ff}
 .summary .card-value{font-size:1.5rem}
 .form-grid{grid-template-columns:1fr}
 .table-wrap{display:none}
-.mobile-cards{display:flex!important;flex-direction:column;gap:12px;margin-top:12px}
+.mobile-cards{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.mobile-cards.hidden{display:none!important}
 .tabs{gap:6px}
 .tab{padding:6px 12px;font-size:.75rem}
 .controls{flex-direction:column;gap:8px}
@@ -806,7 +807,7 @@ function renderActivity(){
 function showBoardView(){
   boardView=true;
   document.querySelector(".table-wrap").style.display="none";
-  document.getElementById("mobileCards").style.display="none";
+  document.getElementById("mobileCards").classList.add("hidden");
   document.getElementById("empty").style.display="none";
   document.getElementById("kanbanContainer").classList.add("open");
   document.getElementById("segBoard").classList.add("active");
@@ -816,7 +817,7 @@ function showBoardView(){
 function hideBoardView(){
   boardView=false;
   document.querySelector(".table-wrap").style.display="";
-  document.getElementById("mobileCards").style.display="";
+  document.getElementById("mobileCards").classList.remove("hidden");
   document.getElementById("kanbanContainer").classList.remove("open");
   document.getElementById("segTable").classList.add("active");
   document.getElementById("segBoard").classList.remove("active");
@@ -826,7 +827,7 @@ function showActivityView(){
   document.querySelector(".add-form").classList.remove("open");
   document.getElementById("empty").style.display="none";
   document.querySelector(".summary").style.display="none";
-  document.getElementById("mobileCards").style.display="none";
+  document.getElementById("mobileCards").classList.add("hidden");
   document.getElementById("updatesContainer").classList.remove("open");
   document.getElementById("winsContainer").classList.remove("open");
   document.getElementById("kanbanContainer").classList.remove("open");
@@ -1075,7 +1076,7 @@ function showWinsView(){
   document.querySelector(".add-form").classList.remove("open");
   document.getElementById("empty").style.display="none";
   document.querySelector(".summary").style.display="none";
-  document.getElementById("mobileCards").style.display="none";
+  document.getElementById("mobileCards").classList.add("hidden");
   document.getElementById("updatesContainer").classList.remove("open");
   document.getElementById("kanbanContainer").classList.remove("open");
   document.getElementById("activityContainer").classList.remove("open");
@@ -1155,7 +1156,7 @@ function showUpdatesView(){
   document.querySelector(".add-form").classList.remove("open");
   document.getElementById("empty").style.display="none";
   document.querySelector(".summary").style.display="none";
-  document.getElementById("mobileCards").style.display="none";
+  document.getElementById("mobileCards").classList.add("hidden");
   document.getElementById("winsContainer").classList.remove("open");
   document.getElementById("kanbanContainer").classList.remove("open");
   document.getElementById("activityContainer").classList.remove("open");
@@ -1166,7 +1167,7 @@ function showUpdatesView(){
 function hideUpdatesView(){
   document.querySelector(".table-wrap").style.display="";
   document.querySelector(".summary").style.display="";
-  document.getElementById("mobileCards").style.display="";
+  document.getElementById("mobileCards").classList.remove("hidden");
   document.getElementById("updatesContainer").classList.remove("open");
   document.getElementById("activityContainer").classList.remove("open");
 }
