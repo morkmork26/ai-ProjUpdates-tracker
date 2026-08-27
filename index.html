@@ -1609,8 +1609,17 @@ function loadFromCloud() {
           migrateItem(item);
         });
         var cloudIds = d.items.map(function(i) { return i.id; });
+        var localIds = items.map(function(i) { return i.id; });
         var localOnly = items.filter(function(i) { return cloudIds.indexOf(i.id) === -1; });
-        items = d.items.concat(localOnly);
+        var cloudOnly = d.items.filter(function(i) { return localIds.indexOf(i.id) === -1; });
+        var merged = items.slice();
+        cloudOnly.forEach(function(ci) { merged.push(ci); });
+        d.items.forEach(function(ci) {
+          var li = merged.findIndex(function(m) { return m.id === ci.id; });
+          if (li !== -1 && ci.completedAt && !merged[li].completedAt) merged[li] = ci;
+          if (li !== -1 && ci.progress !== merged[li].progress && ci.completedAt > (merged[li].completedAt||"")) merged[li] = ci;
+        });
+        items = merged;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
         localStorage.setItem(STORAGE_KEY+"_ver", String(EMBEDDED_VERSION));
         changed = true;
