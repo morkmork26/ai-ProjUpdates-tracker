@@ -1308,7 +1308,7 @@ function editItem(id){
 }
 function getBlockHtml(item){
   if(item.progress==="blocked"){
-    var val=(item.blockReason||"").replace(/"/g,"&quot;");
+    var val=esc(item.blockReason||"").replace(/"/g,"&quot;");
     return '<input class="block-input" id="block-input-'+item.id+'" value="'+val+'" placeholder="Reason...">';
   }
   return"";
@@ -1371,7 +1371,7 @@ function render(){
         h+='<td><span class="subtask-task">'+esc(st.task)+'</span>';
         h+='<div class="subtask-progress" onclick="cycleSubtaskProgress('+st.id+')" title="Click to cycle"><div class="subtask-progress-fill" style="width:'+stFillW+';background:'+stColor+'"></div></div>';
         h+='<span class="subtask-stage" style="color:'+stColor+'">'+STAGE_LABELS[st.progress]+'</span>';
-        if(st.progress==="blocked")h+='<input class="block-input" id="block-input-sub-'+st.id+'" value="'+(st.blockReason||"").replace(/"/g,"&quot;")+'" placeholder="Reason..." style="max-width:200px">';
+        if(st.progress==="blocked")h+='<input class="block-input" id="block-input-sub-'+st.id+'" value="'+esc(st.blockReason||"").replace(/"/g,"&quot;")+'" placeholder="Reason..." style="max-width:200px">';
         h+='</td>';
         h+='<td></td><td></td><td></td>';
         h+='<td><button class="delete-btn" onclick="deleteSubtask('+st.id+')" style="font-size:.75rem">&times;</button></td>';
