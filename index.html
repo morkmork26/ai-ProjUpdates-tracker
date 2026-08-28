@@ -677,6 +677,7 @@ function renderKanban(){
   if(showMineOnly)filtered=filtered.filter(function(i){return MY_NAMES.indexOf((i.owner||"").toLowerCase())!==-1});
   if(searchQuery){var q=searchQuery.toLowerCase();filtered=filtered.filter(function(i){return(i.task||"").toLowerCase().indexOf(q)!==-1||(i.project||"").toLowerCase().indexOf(q)!==-1||(i.owner||"").toLowerCase().indexOf(q)!==-1||(i.source||"").toLowerCase().indexOf(q)!==-1||(i.notes||"").toLowerCase().indexOf(q)!==-1})}
   if(hideDone)filtered=filtered.filter(function(i){return i.progress!=="done"});
+  if(!showArchived&&!thisWeekMode)filtered=filtered.filter(function(i){return!isArchivedItem(i)});
   if(thisWeekMode)filtered=filtered.filter(isThisWeekItem);
   var cols={"not-started":[],"in-progress":[],"blocked":[],"done":[]};
   filtered.forEach(function(i){if(cols[i.progress])cols[i.progress].push(i)});
