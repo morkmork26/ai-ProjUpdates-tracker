@@ -1385,6 +1385,7 @@ function render(){
     }
   });
   tbody.innerHTML=h;
+  console.log("[AI-TRACKER DEBUG] items:",items.length,"filtered:",filtered.length,"rows in h:",(h.match(/data-id=/g)||[]).length);
   document.getElementById("empty").style.display=filtered.length?"none":"block";
   if(manualSort){
     tbody.querySelectorAll("tr[draggable]").forEach(function(row){
