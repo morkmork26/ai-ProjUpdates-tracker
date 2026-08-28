@@ -1351,7 +1351,7 @@ function render(){
     h+='<td>'+esc(i.source||"-")+'</td>';
     h+='<td><button class="add-sub-btn" onclick="toggleSubtaskExpand('+i.id+')" title="Sub-tasks">+sub</button> <button class="edit-btn" onclick="editItem('+i.id+')" title="Edit">&#9998;</button> <button class="delete-btn" onclick="deleteItem('+i.id+')" title="Delete">&times;</button></td>';
     h+='</tr>';
-    h+='<tr class="notes-row" id="notes-'+i.id+'"><td colspan="10"><textarea class="notes-textarea" id="note-text-'+i.id+'" placeholder="Add notes...">'+(i.notes||"")+'</textarea></td></tr>';
+    h+='<tr class="notes-row" id="notes-'+i.id+'"><td colspan="10"><textarea class="notes-textarea" id="note-text-'+i.id+'" placeholder="Add notes...">'+esc(i.notes||"")+'</textarea></td></tr>';
     // Sub-task rows
     if(expandedSubtasks[i.id]){
       var subs=getSubtasksForItem(i.id);
