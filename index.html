@@ -1036,8 +1036,11 @@ function addUpdate(){
   if(!date)date=new Date().toISOString().split("T")[0];
   updates.push({id:uniqueId(),project:proj,date:date,text:text});
   saveUpdates();
+  var keepProj=document.getElementById("upd-project").value;
   document.getElementById("upd-text").value="";
   renderUpdates();
+  var projSel=document.getElementById("upd-project");
+  if(keepProj&&projSel.querySelector('option[value="'+keepProj+'"]'))projSel.value=keepProj;
 }
 function deleteUpdate(id){
   if(!confirm("Delete this update?"))return;
@@ -1185,6 +1188,8 @@ function showUpdatesView(){
   document.getElementById("updatesContainer").classList.add("open");
   document.getElementById("upd-date").value=new Date().toISOString().split("T")[0];
   renderUpdates();
+  var projSel=document.getElementById("upd-project");
+  if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0&&projSel.querySelector('option[value="'+currentFilter+'"]'))projSel.value=currentFilter;
 }
 function hideUpdatesView(){
   document.querySelector(".table-wrap").style.display="";
@@ -1892,7 +1897,7 @@ render();
 
 // What's New popup
 (function(){
-  var BUILD = "2026-09-02-v4";
+  var BUILD = "2026-09-02-v5";
   var SEEN_KEY = "ai_tracker_whats_new_seen";
   if(localStorage.getItem(SEEN_KEY)===BUILD)return;
   var overlay=document.createElement("div");
