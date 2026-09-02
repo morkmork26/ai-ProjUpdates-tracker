@@ -202,7 +202,6 @@ body.light .mobile-card-meta{color:#656d76}
 body.light .mobile-sub-input{background:#fff;border-color:#d0d7de;color:#1f2328}
 /* Mobile form backdrop */
 .form-backdrop{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:899;backdrop-filter:blur(2px)}
-.form-backdrop.open{display:block}
 @media(max-width:768px){.form-backdrop.open{display:block}}
 
 /* Updates Tab Styles */
@@ -1893,7 +1892,7 @@ render();
 
 // What's New popup
 (function(){
-  var BUILD = "2026-09-02-v3";
+  var BUILD = "2026-09-02-v4";
   var SEEN_KEY = "ai_tracker_whats_new_seen";
   if(localStorage.getItem(SEEN_KEY)===BUILD)return;
   var overlay=document.createElement("div");
@@ -1903,10 +1902,9 @@ render();
   box.innerHTML='<h2 style="margin:0 0 8px;color:#58a6ff;font-size:1.2rem">&#127881; What\'s New</h2>'
     +'<p style="font-size:.75rem;color:#8b949e;margin:0 0 16px">Build: '+BUILD+'</p>'
     +'<ul style="padding-left:18px;margin:0 0 20px;font-size:.85rem;line-height:1.8;color:#c9d1d9">'
+    +'<li>Fixed blur overlay appearing on desktop when opening Add AI form</li>'
     +'<li>Fixed service worker intercepting cloud sync requests</li>'
-    +'<li>Added 15s timeout on cloud sync (no more infinite loading)</li>'
-    +'<li>Non-GET requests no longer cached by SW</li>'
-    +'<li>Google Apps Script redirect handling improved</li>'
+    +'<li>Added 15s timeout on cloud sync</li>'
     +'</ul>'
     +'<button id="wnDismiss" style="background:#238636;border:none;color:#fff;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;width:100%">Got it!</button>';
   overlay.appendChild(box);
