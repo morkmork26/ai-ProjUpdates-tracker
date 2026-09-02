@@ -15,6 +15,13 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  var url = event.request.url;
+  if (url.indexOf('script.google.com') !== -1 || url.indexOf('googleapis.com') !== -1) {
+    return;
+  }
+  if (event.request.method !== 'GET') {
+    return;
+  }
   event.respondWith(
     fetch(event.request).then(function(resp) {
       if (!resp || resp.status !== 200) return resp;

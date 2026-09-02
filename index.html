@@ -1592,15 +1592,19 @@ function syncToCloud() {
   syncInProgress = true;
   var itemsForCloud = items.map(function(i){var c=JSON.parse(JSON.stringify(i));c.subtasksJson=JSON.stringify(c.subtasks||[]);delete c.subtasks;return c});
   var payload = {action: "save", app: "ai", data: {items: itemsForCloud, updates: updates, projects: projects}};
-  fetch(SCRIPT_URL, {method: "POST", body: JSON.stringify(payload), headers: {"Content-Type": "text/plain"}})
-    .then(function(r) { return r.json(); })
-    .then(function(d) { syncInProgress = false; console.log("Synced to cloud:", d.timestamp); })
-    .catch(function(e) { syncInProgress = false; console.warn("Sync failed:", e); });
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
+  fetch(SCRIPT_URL, {method: "POST", body: JSON.stringify(payload), headers: {"Content-Type": "text/plain"}, redirect: "follow", signal: controller.signal})
+    .then(function(r) { clearTimeout(timeoutId); if(r.type==="opaque"||r.type==="opaqueredirect"){syncInProgress=false;console.log("Synced (opaque)");return} return r.json(); })
+    .then(function(d) { syncInProgress = false; if(d)console.log("Synced to cloud:", d.timestamp); })
+    .catch(function(e) { clearTimeout(timeoutId); syncInProgress = false; console.warn("Sync failed:", e); });
 }
 
 function loadFromCloud() {
-  fetch(SCRIPT_URL + "?action=load&app=ai")
-    .then(function(r) { return r.json(); })
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
+  fetch(SCRIPT_URL + "?action=load&app=ai", {redirect: "follow", signal: controller.signal})
+    .then(function(r) { clearTimeout(timeoutId); return r.json(); })
     .then(function(d) {
       var changed = false;
       if (d.items && d.items.length > 0) {
@@ -1642,7 +1646,7 @@ function loadFromCloud() {
       if (changed) render();
       console.log("Loaded from cloud");
     })
-    .catch(function(e) { console.warn("Cloud load failed, using local:", e); });
+    .catch(function(e) { clearTimeout(timeoutId); console.warn("Cloud load failed, using local:", e); });
 }
 
 // Wrap save functions to also sync (debounced to avoid hammering the endpoint)
@@ -1886,6 +1890,30 @@ renderProjectTabs();
 populateProjectDropdown();
 
 render();
+
+// What's New popup
+(function(){
+  var BUILD = "2026-09-02-v3";
+  var SEEN_KEY = "ai_tracker_whats_new_seen";
+  if(localStorage.getItem(SEEN_KEY)===BUILD)return;
+  var overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center";
+  var box=document.createElement("div");
+  box.style.cssText="background:linear-gradient(135deg,#161b22,#1c2128);border:1px solid #30363d;border-radius:16px;padding:32px;max-width:420px;width:90%;color:#c9d1d9;font-family:inherit;box-shadow:0 16px 48px rgba(0,0,0,.5)";
+  box.innerHTML='<h2 style="margin:0 0 8px;color:#58a6ff;font-size:1.2rem">&#127881; What\'s New</h2>'
+    +'<p style="font-size:.75rem;color:#8b949e;margin:0 0 16px">Build: '+BUILD+'</p>'
+    +'<ul style="padding-left:18px;margin:0 0 20px;font-size:.85rem;line-height:1.8;color:#c9d1d9">'
+    +'<li>Fixed service worker intercepting cloud sync requests</li>'
+    +'<li>Added 15s timeout on cloud sync (no more infinite loading)</li>'
+    +'<li>Non-GET requests no longer cached by SW</li>'
+    +'<li>Google Apps Script redirect handling improved</li>'
+    +'</ul>'
+    +'<button id="wnDismiss" style="background:#238636;border:none;color:#fff;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;width:100%">Got it!</button>';
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  document.getElementById("wnDismiss").addEventListener("click",function(){localStorage.setItem(SEEN_KEY,BUILD);overlay.remove()});
+  overlay.addEventListener("click",function(e){if(e.target===overlay){localStorage.setItem(SEEN_KEY,BUILD);overlay.remove()}});
+})();
 </script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}</script>
 </body>
