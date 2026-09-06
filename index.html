@@ -307,6 +307,57 @@ body.light .kanban-col.drag-over{background:#0969da11;border-color:#0969da;box-s
 body.light .kanban-card .kc-task{color:#1f2328}
 @media(max-width:768px){.kanban-board{grid-template-columns:1fr}}
 
+/* Eisenhower Matrix */
+.matrix-container{display:none;animation:slideDown .3s ease}
+.matrix-container.open{display:block}
+.matrix-wrap{position:relative;margin-top:16px}
+.matrix-axis-y{position:absolute;left:-18px;top:50%;transform:rotate(-90deg) translateX(50%);font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:2px;white-space:nowrap}
+.matrix-axis-x{text-align:center;font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:2px;margin-top:8px}
+.matrix-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:0;border:1px solid #30363d;border-radius:12px;overflow:hidden;margin-left:20px}
+.matrix-col-labels{display:contents}
+.matrix-col-label{padding:10px 16px;text-align:center;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:#161b22;border-bottom:1px solid #30363d;color:#8b949e}
+.matrix-col-label:first-child{border-right:1px solid #30363d}
+.matrix-quadrant{min-height:220px;padding:12px;position:relative;overflow:hidden;transition:background .2s}
+.matrix-quadrant.drag-over{box-shadow:inset 0 0 20px rgba(88,166,255,.15)}
+.mq-q1{background:#f8514908;border-right:1px solid #30363d;border-bottom:1px solid #30363d}
+.mq-q2{background:#58a6ff08;border-bottom:1px solid #30363d}
+.mq-q3{background:#d2992208;border-right:1px solid #30363d}
+.mq-q4{background:#8b949e08}
+.mq-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #21262d}
+.mq-header .mq-icon{font-size:1rem}
+.mq-header .mq-title{font-size:.78rem;font-weight:700;letter-spacing:.5px}
+.mq-header .mq-count{font-size:.65rem;background:#21262d;padding:2px 8px;border-radius:8px;color:#8b949e}
+.mq-q1 .mq-header .mq-title{color:#f85149}
+.mq-q2 .mq-header .mq-title{color:#58a6ff}
+.mq-q3 .mq-header .mq-title{color:#d29922}
+.mq-q4 .mq-header .mq-title{color:#8b949e}
+.matrix-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:grab;transition:transform .2s,box-shadow .2s;position:relative}
+.matrix-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.matrix-card.dragging{opacity:.4;transform:scale(.95)}
+.matrix-card .mc-project{margin-bottom:4px}
+.matrix-card .mc-task{font-size:.8rem;font-weight:600;color:#c9d1d9;line-height:1.3;margin-bottom:6px}
+.matrix-card .mc-meta{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:#8b949e}
+.matrix-card .mc-due{font-size:.68rem}
+.matrix-card .mc-priority{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%}
+.matrix-row-label{display:none}
+body.light .matrix-grid{border-color:#d0d7de}
+body.light .matrix-col-label{background:#f6f8fa;border-color:#d0d7de;color:#656d76}
+body.light .mq-q1{background:#f8514906;border-color:#d0d7de}
+body.light .mq-q2{background:#0969da06;border-color:#d0d7de}
+body.light .mq-q3{background:#d2992206;border-color:#d0d7de}
+body.light .mq-q4{background:#8b949e06;border-color:#d0d7de}
+body.light .matrix-card{background:#fff;border-color:#d0d7de}
+body.light .matrix-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+body.light .matrix-card .mc-task{color:#1f2328}
+body.light .mq-header{border-bottom-color:#d0d7de}
+@media(max-width:768px){
+.matrix-grid{grid-template-columns:1fr;margin-left:0}
+.matrix-col-labels{display:none}
+.matrix-axis-y{display:none}
+.matrix-quadrant{min-height:120px;border-right:none!important;border-bottom:1px solid #30363d}
+.matrix-row-label{display:block;font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+}
+
 
 /* Activity log */
 .activity-container{display:none;animation:slideDown .3s ease}
@@ -477,6 +528,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   <div class="segmented-control">
     <button class="seg-btn active" id="segTable">Table</button>
     <button class="seg-btn" id="segBoard">Board</button>
+    <button class="seg-btn" id="segMatrix">Matrix</button>
   </div>
   <div class="search-collapsible">
     <button class="search-icon-btn" id="searchToggleBtn" title="Search">&#128269;</button>
@@ -589,6 +641,22 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 </div>
 <div class="kanban-container" id="kanbanContainer">
   <div class="kanban-board" id="kanbanBoard"></div>
+</div>
+<div class="matrix-container" id="matrixContainer">
+  <div class="matrix-wrap">
+    <div class="matrix-axis-y">&#8592; Important</div>
+    <div class="matrix-grid">
+      <div class="matrix-col-labels">
+        <div class="matrix-col-label">&#128308; Urgent</div>
+        <div class="matrix-col-label">Not Urgent</div>
+      </div>
+      <div class="matrix-quadrant mq-q1" data-quadrant="q1"></div>
+      <div class="matrix-quadrant mq-q2" data-quadrant="q2"></div>
+      <div class="matrix-quadrant mq-q3" data-quadrant="q3"></div>
+      <div class="matrix-quadrant mq-q4" data-quadrant="q4"></div>
+    </div>
+    <div class="matrix-axis-x">Urgency &#8594;</div>
+  </div>
 </div>
 <div class="activity-container" id="activityContainer">
   <div class="activity-feed" id="activityFeed"></div>
@@ -843,6 +911,105 @@ function hideBoardView(){
   document.getElementById("kanbanContainer").classList.remove("open");
   document.getElementById("segTable").classList.add("active");
   document.getElementById("segBoard").classList.remove("active");
+}
+function getTaskQuadrant(item){
+  var dominated=item.priority==="High";
+  var urgent=false;
+  if(item.dueDate){
+    var due=normalizeToDay(item.dueDate);var today=todayNormalized();
+    var diffDays=Math.round((due-today)/(1000*60*60*24));
+    if(diffDays<=3)urgent=true;
+  }
+  if(urgent&&dominated)return"q1";
+  if(!urgent&&dominated)return"q2";
+  if(urgent&&!dominated)return"q3";
+  return"q4";
+}
+function renderMatrix(){
+  var filtered=items.filter(function(i){return i.progress!=="done"});
+  filtered=filtered.filter(function(i){return currentFilter==="all"||i.project===currentFilter});
+  if(showMineOnly)filtered=filtered.filter(function(i){return MY_NAMES.indexOf((i.owner||"").toLowerCase())!==-1});
+  if(searchQuery){var q=searchQuery.toLowerCase();filtered=filtered.filter(function(i){return(i.task||"").toLowerCase().indexOf(q)!==-1||(i.project||"").toLowerCase().indexOf(q)!==-1||(i.owner||"").toLowerCase().indexOf(q)!==-1})}
+  if(!showArchived&&!thisWeekMode)filtered=filtered.filter(function(i){return!isArchivedItem(i)});
+  if(thisWeekMode)filtered=filtered.filter(isThisWeekItem);
+  var buckets={q1:[],q2:[],q3:[],q4:[]};
+  filtered.forEach(function(i){buckets[getTaskQuadrant(i)].push(i)});
+  var labels={q1:{icon:"\u{1F525}",title:"DO FIRST",color:"#f85149"},q2:{icon:"\u{1F4C5}",title:"SCHEDULE",color:"#58a6ff"},q3:{icon:"\u{1F4E4}",title:"DELEGATE",color:"#d29922"},q4:{icon:"\u{1F5D1}",title:"ELIMINATE",color:"#8b949e"}};
+  ["q1","q2","q3","q4"].forEach(function(qid){
+    var el=document.querySelector('.matrix-quadrant[data-quadrant="'+qid+'"]');
+    var lab=labels[qid];
+    var html='<div class="mq-header"><span class="mq-icon">'+lab.icon+'</span><span class="mq-title">'+lab.title+'</span><span class="mq-count">'+buckets[qid].length+'</span></div>';
+    html+='<div class="matrix-row-label">'+lab.title+'</div>';
+    buckets[qid].forEach(function(i){
+      var pDot=i.priority==="High"?"background:#f85149":i.priority==="Low"?"background:#484f58":"background:#d29922";
+      var dueText=formatRelativeDate(i.dueDate);
+      var dueClass=getDueClass(i);
+      html+='<div class="matrix-card" draggable="true" data-id="'+i.id+'">';
+      html+='<div class="mc-priority" style="'+pDot+'"></div>';
+      html+='<div class="mc-project"><span class="project-badge">'+esc(i.project)+'</span></div>';
+      html+='<div class="mc-task">'+esc(i.task)+'</div>';
+      html+='<div class="mc-meta"><span>'+esc(i.owner)+'</span><span class="mc-due '+dueClass+'" title="'+(i.dueDate||"")+'">'+dueText+'</span></div>';
+      html+='</div>';
+    });
+    el.innerHTML=html;
+  });
+  var dragCardId=null;
+  document.querySelectorAll(".matrix-card").forEach(function(card){
+    card.addEventListener("dragstart",function(){dragCardId=+card.dataset.id;card.classList.add("dragging")});
+    card.addEventListener("dragend",function(){card.classList.remove("dragging");dragCardId=null});
+  });
+  document.querySelectorAll(".matrix-quadrant").forEach(function(quad){
+    quad.addEventListener("dragover",function(e){e.preventDefault();quad.classList.add("drag-over")});
+    quad.addEventListener("dragleave",function(){quad.classList.remove("drag-over")});
+    quad.addEventListener("drop",function(e){
+      e.preventDefault();quad.classList.remove("drag-over");
+      if(dragCardId===null)return;
+      var targetQ=quad.dataset.quadrant;
+      var item=items.find(function(i){return i.id===dragCardId});
+      if(!item)return;
+      var currentQ=getTaskQuadrant(item);
+      if(currentQ===targetQ)return;
+      pushUndo();
+      var isImportant=(targetQ==="q1"||targetQ==="q2");
+      var isUrgent=(targetQ==="q1"||targetQ==="q3");
+      item.priority=isImportant?"High":"Med";
+      if(isUrgent){
+        var today=todayNormalized();
+        var soon=new Date(today);soon.setDate(today.getDate()+1);
+        if(!item.dueDate||normalizeToDay(item.dueDate)>new Date(todayNormalized().getTime()+3*86400000)){
+          item.dueDate=soon.getFullYear()+"-"+String(soon.getMonth()+1).padStart(2,"0")+"-"+String(soon.getDate()).padStart(2,"0");
+        }
+      }else{
+        if(item.dueDate){
+          var due=normalizeToDay(item.dueDate);var today2=todayNormalized();
+          var diffDays=Math.round((due-today2)/(1000*60*60*24));
+          if(diffDays<=3){
+            var future=new Date(today2);future.setDate(today2.getDate()+7);
+            item.dueDate=future.getFullYear()+"-"+String(future.getMonth()+1).padStart(2,"0")+"-"+String(future.getDate()).padStart(2,"0");
+          }
+        }
+      }
+      logActivity(item.id,item.task,item.project,currentQ,targetQ);
+      saveItems();renderMatrix();
+    });
+  });
+}
+function showMatrixView(){
+  matrixView=true;
+  document.querySelector(".table-wrap").style.display="none";
+  document.getElementById("mobileCards").classList.add("hidden");
+  document.getElementById("empty").style.display="none";
+  document.getElementById("kanbanContainer").classList.remove("open");
+  document.getElementById("matrixContainer").classList.add("open");
+  document.getElementById("segMatrix").classList.add("active");
+  document.getElementById("segTable").classList.remove("active");
+  document.getElementById("segBoard").classList.remove("active");
+  renderMatrix();
+}
+function hideMatrixView(){
+  matrixView=false;
+  document.getElementById("matrixContainer").classList.remove("open");
+  document.getElementById("segMatrix").classList.remove("active");
 }
 function showActivityView(){
   document.querySelector(".table-wrap").style.display="none";
@@ -1203,7 +1370,7 @@ var undoStack = [], redoStack = [], MAX_UNDO = 20;
 var hideDone = true, manualSort = false, showMineOnly = false;
 var currentFilter = "all", sortCol = "dueDate", sortAsc = true, dragId = null;
 var items = [], projects = [];
-var searchQuery = "", thisWeekMode = false, boardView = false, selectMode = false, showArchived = false;
+var searchQuery = "", thisWeekMode = false, boardView = false, matrixView = false, selectMode = false, showArchived = false;
 var selectedItems = [];
 var ACTIVITY_KEY = "ai_tracker_activity";
 var ARCHIVE_DAYS = 14;
@@ -1676,18 +1843,27 @@ document.getElementById("toggleWeek").addEventListener("click",function(){
   this.textContent=thisWeekMode?"All Items":"This Week";
   render();
   if(boardView)renderKanban();
+  if(matrixView)renderMatrix();
 });
 
-// Segmented control (Table/Board)
+// Segmented control (Table/Board/Matrix)
 document.getElementById("segTable").addEventListener("click",function(){
+  if(boardView)hideBoardView();
+  if(matrixView)hideMatrixView();
   document.getElementById("segTable").classList.add("active");
   document.getElementById("segBoard").classList.remove("active");
-  if(boardView){hideBoardView();render()}
+  document.getElementById("segMatrix").classList.remove("active");
+  document.querySelector(".table-wrap").style.display="";
+  document.getElementById("mobileCards").classList.remove("hidden");
+  render();
 });
 document.getElementById("segBoard").addEventListener("click",function(){
-  document.getElementById("segBoard").classList.add("active");
-  document.getElementById("segTable").classList.remove("active");
+  if(matrixView)hideMatrixView();
   if(!boardView)showBoardView();
+});
+document.getElementById("segMatrix").addEventListener("click",function(){
+  if(boardView)hideBoardView();
+  if(!matrixView)showMatrixView();
 });
 
 // Select mode toggle
@@ -1705,6 +1881,7 @@ document.getElementById("searchInput").addEventListener("input",function(){
   searchQuery=this.value.trim();
   render();
   if(boardView)renderKanban();
+  if(matrixView)renderMatrix();
 });
 
 // Keyboard shortcuts
@@ -1791,7 +1968,7 @@ function renderProjectTabs(){
       activateViewTab("all");
       hideUpdatesView();hideWinsView();hideActivityView();
       renderProjectTabs();
-      if(boardView)renderKanban();else render();
+      if(boardView)renderKanban();else if(matrixView)renderMatrix();else render();
       document.getElementById("filterBar").style.display="";
       document.querySelector(".summary").style.display="";
     });
@@ -1811,7 +1988,7 @@ function renderProjectTabs(){
         hideUpdatesView();hideWinsView();hideActivityView();
         renderProjectTabs();
         dd.classList.remove("open");
-        if(boardView)renderKanban();else render();
+        if(boardView)renderKanban();else if(matrixView)renderMatrix();else render();
         document.getElementById("filterBar").style.display="";
         document.querySelector(".summary").style.display="";
       });
@@ -1833,7 +2010,7 @@ document.querySelectorAll(".view-tab").forEach(function(vt){
       document.getElementById("filterBar").style.display="";
       document.querySelector(".summary").style.display="";
       document.getElementById("projectTabsRow").style.display="";
-      if(boardView){renderKanban()}else{render()}
+      if(boardView){renderKanban()}else if(matrixView){renderMatrix()}else{render()}
     }else if(view==="__updates__"){
       currentFilter="__updates__";
       hideWinsView();hideActivityView();showUpdatesView();
@@ -1846,7 +2023,7 @@ document.querySelectorAll(".view-tab").forEach(function(vt){
       document.getElementById("projectTabsRow").style.display="none";
     }else if(view==="__activity__"){
       currentFilter="__activity__";
-      hideUpdatesView();hideWinsView();hideBoardView();showActivityView();
+      hideUpdatesView();hideWinsView();hideBoardView();hideMatrixView();showActivityView();
       document.getElementById("filterBar").style.display="none";
       document.getElementById("projectTabsRow").style.display="none";
     }
