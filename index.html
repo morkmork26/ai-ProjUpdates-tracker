@@ -226,6 +226,12 @@ body.light .mobile-sub-input{background:#fff;border-color:#d0d7de;color:#1f2328}
 .timeline-entry .entry-text{flex:1;font-size:.85rem;line-height:1.5;color:#c9d1d9}
 .timeline-entry .entry-delete{background:none;border:none;color:#484f58;cursor:pointer;font-size:.9rem;padding:2px 6px;transition:color .2s}
 .timeline-entry .entry-delete:hover{color:#f85149}
+.timeline-entry .entry-date,.timeline-entry .entry-text{cursor:pointer;border-radius:4px;padding:2px 4px;transition:background .2s}
+.timeline-entry .entry-date:hover,.timeline-entry .entry-text:hover{background:rgba(88,166,255,.1)}
+.timeline-entry .entry-date .edit-date{width:110px;background:#0d1117;border:1px solid #58a6ff;color:#c9d1d9;border-radius:4px;padding:2px 4px;font-size:.75rem}
+.timeline-entry .entry-text .edit-text{width:100%;background:#0d1117;border:1px solid #58a6ff;color:#c9d1d9;border-radius:4px;padding:4px 6px;font-size:.85rem;font-family:inherit;resize:vertical;min-height:32px}
+.timeline-entry .edit-project{background:#0d1117;border:1px solid #a371f7;color:#c9d1d9;border-radius:4px;padding:1px 4px;font-size:.65rem;margin-top:2px}
+body.light .timeline-entry .edit-date,body.light .timeline-entry .edit-text,body.light .timeline-entry .edit-project{background:#fff;border-color:#8250df;color:#1f2328}
 .timeline-empty{text-align:center;padding:48px;color:#8b949e;font-size:.9rem}
 body.light .update-form{background:linear-gradient(135deg,#fff,#f6f8fa);border-color:#d0d7de}
 body.light .timeline-entry{background:#fff;border-color:#d0d7de;border-left-color:#8250df}
@@ -1471,6 +1477,36 @@ function deleteUpdate(id){
   updates=updates.filter(function(u){return u.id!==id});
   saveUpdates();renderUpdates();
 }
+function editUpdateText(id,el){
+  if(el.querySelector(".edit-text"))return;
+  var u=updates.find(function(x){return x.id===id});if(!u)return;
+  var ta=document.createElement("textarea");ta.className="edit-text";ta.value=u.text;
+  el.textContent="";el.appendChild(ta);ta.focus();ta.select();
+  function save(){var v=ta.value.trim();if(v&&v!==u.text){u.text=v;saveUpdates()}renderUpdates()}
+  ta.addEventListener("blur",save);
+  ta.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();save()}if(e.key==="Escape")renderUpdates()});
+}
+function editUpdateDate(id,el){
+  if(el.querySelector(".edit-date"))return;
+  var u=updates.find(function(x){return x.id===id});if(!u)return;
+  var projDiv=el.querySelector("div");var projHtml=projDiv?projDiv.outerHTML:"";
+  var inp=document.createElement("input");inp.type="date";inp.className="edit-date";inp.value=u.date;
+  el.textContent="";el.appendChild(inp);if(projDiv){var d=document.createElement("div");d.innerHTML=projHtml;el.appendChild(d.firstChild)}
+  inp.focus();
+  function save(){var v=inp.value;if(v&&v!==u.date){u.date=v;saveUpdates()}renderUpdates()}
+  inp.addEventListener("blur",save);inp.addEventListener("change",save);
+  inp.addEventListener("keydown",function(e){if(e.key==="Escape")renderUpdates()});
+}
+function editUpdateProject(id,el){
+  if(el.querySelector(".edit-project"))return;
+  var u=updates.find(function(x){return x.id===id});if(!u)return;
+  var sel=document.createElement("select");sel.className="edit-project";
+  projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;if(p===u.project)o.selected=true;sel.appendChild(o)});
+  el.textContent="";el.appendChild(sel);sel.focus();
+  function save(){var v=sel.value;if(v!==u.project){u.project=v;saveUpdates()}renderUpdates()}
+  sel.addEventListener("blur",save);sel.addEventListener("change",save);
+  sel.addEventListener("keydown",function(e){if(e.key==="Escape")renderUpdates()});
+}
 function getWeekKey(dateStr){
   var d=normalizeToDay(dateStr);
   var day=d.getDay();var diff=d.getDate()-day+(day===0?-6:1);
@@ -1513,7 +1549,7 @@ function renderUpdates(){
       weeks[wk].forEach(function(u){
         var escapedText=esc(u.text).replace(/\n/g,"<br>");
         var autoCls=u.type==="auto-done"?" auto-done":"";
-        html+='<div class="timeline-entry'+autoCls+'"><div class="entry-date">'+u.date+'<div style="font-size:.65rem;color:#a371f7;margin-top:2px">'+esc(u.project)+'</div></div><div class="entry-text">'+escapedText+'</div><button class="entry-delete" onclick="deleteUpdate('+u.id+')" title="Delete">&times;</button></div>';
+        html+='<div class="timeline-entry'+autoCls+'" data-uid="'+u.id+'"><div class="entry-date" onclick="editUpdateDate('+u.id+',this)">'+u.date+'<div style="font-size:.65rem;color:#a371f7;margin-top:2px" onclick="event.stopPropagation();editUpdateProject('+u.id+',this)">'+esc(u.project)+'</div></div><div class="entry-text" onclick="editUpdateText('+u.id+',this)">'+escapedText+'</div><button class="entry-delete" onclick="deleteUpdate('+u.id+')" title="Delete">&times;</button></div>';
       });
     });
   }
