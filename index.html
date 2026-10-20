@@ -321,10 +321,10 @@ tr.st-row:hover td{background:transparent}
 /* Eisenhower Matrix */
 .matrix-container{display:none;animation:slideDown .3s ease}
 .matrix-container.open{display:block}
-.matrix-wrap{position:relative;margin-top:16px}
-.matrix-axis-y{position:absolute;left:-18px;top:50%;transform:rotate(-90deg) translateX(50%);font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:2px;white-space:nowrap}
-.matrix-axis-x{text-align:center;font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:2px;margin-top:8px}
-.matrix-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:0;border:1px solid #30363d;border-radius:12px;overflow:hidden;margin-left:20px}
+.matrix-wrap{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;margin-top:16px}
+.matrix-axis-y{grid-column:1;grid-row:1;align-self:center;justify-self:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:2px;white-space:nowrap;line-height:1}
+.matrix-axis-x{grid-column:2;grid-row:2;text-align:center;font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:2px;margin-top:8px}
+.matrix-grid{grid-column:2;grid-row:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:0;border:1px solid #30363d;border-radius:12px;overflow:hidden}
 .matrix-col-labels{display:contents}
 .matrix-col-label{padding:10px 16px;text-align:center;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:#161b22;border-bottom:1px solid #30363d;color:#8b949e}
 .matrix-col-label:first-child{border-right:1px solid #30363d}
@@ -354,7 +354,8 @@ tr.st-row:hover td{background:transparent}
 .matrix-card .mc-priority{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%}
 .matrix-row-label{display:none}
 @media(max-width:768px){
-.matrix-grid{grid-template-columns:1fr;margin-left:0}
+.matrix-wrap{display:block}
+.matrix-grid{grid-template-columns:1fr}
 .matrix-col-labels{display:none}
 .matrix-axis-y{display:none}
 .matrix-quadrant{min-height:120px;border-right:none!important;border-bottom:1px solid #30363d}
@@ -2399,7 +2400,7 @@ render();
 
 // What's New popup
 (function(){
-  var BUILD = "2026-10-20-v11";
+  var BUILD = "2026-10-20-v12";
   var SEEN_KEY = "ai_tracker_whats_new_seen";
   if(localStorage.getItem(SEEN_KEY)===BUILD)return;
   var overlay=document.createElement("div");
@@ -2412,6 +2413,7 @@ render();
     +'<li>All your projects now show as tabs; the More menu is gone</li>'
     +'<li>Cleaner layout: removed Owner, My AIs, Select, Manual Order and the archived toggle</li>'
     +'<li>Finished and archived items live in the Completed tab</li>'
+    +'<li>Matrix "Important" label now sits outside the grid, matching the Urgency label</li>'
     +'<li>Ctrl+Z undoes your last change (tasks and updates); Ctrl+Shift+Z or Ctrl+Y redoes it</li>'
     +'<li>Removed the LT7170-PSKIP, OTHER TASKS and Others project tabs</li>'
     +'<li>Opened Add sub-task by mistake? Click + Sub again, click away, press Esc, or use the x to close it</li>'
