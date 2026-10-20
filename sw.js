@@ -1,4 +1,4 @@
-var CACHE_NAME = 'ai-tracker-v8';
+var CACHE_NAME = 'ai-tracker-v9';
 var urlsToCache = [
   '/ai-ProjUpdates-tracker/',
   '/ai-ProjUpdates-tracker/index.html',

@@ -151,6 +151,11 @@ tr.st-row:hover td{background:transparent}
 .st-add.editing .st-add-btn{display:none}
 .st-add.editing .st-add-input{display:block}
 .st-add.editing .st-add-hint{display:inline}
+.st-add-cancel{display:none}
+.undo-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);background:#1f2937;color:#f9fafb;border:1px solid #374151;padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:500;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:9999}
+.undo-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){.undo-toast{transition:none}}
+.st-add.editing .st-add-cancel{display:inline-flex}
 .st-chip{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:1px 7px 1px 4px;border:1px solid transparent;border-radius:999px;background:var(--st-chip-bg);color:var(--st-chip-fg);font:inherit;font-size:.66rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.6;cursor:pointer;vertical-align:middle;transition:background .15s,border-color .15s,color .15s}
 .st-chip:hover,.st-chip:focus-visible{border-color:var(--st-accent);color:var(--st-accent)}
 .st-chip.complete{background:var(--st-ok-bg);color:var(--st-ok)}
@@ -1517,6 +1522,7 @@ function subChecklistHtml(item,ctx){
   h+='<button type="button" class="st-add-btn" onclick="openSubAdd('+pid+',\''+ctx+'\')">Add sub-task</button>';
   h+='<input class="st-add-input" id="sub-add-'+ctx+'-'+pid+'" placeholder="Sub-task name" aria-label="New sub-task" onkeydown="subAddKey(event,'+pid+',\''+ctx+'\')" onblur="subAddBlur(this,'+pid+',\''+ctx+'\')">';
   h+='<span class="st-add-hint">Enter to add, Esc to cancel</span>';
+  h+='<button type="button" class="mc-act-btn st-add-cancel" onmousedown="event.preventDefault()" onclick="cancelSubAdd('+pid+',\''+ctx+'\')" title="Cancel" aria-label="Cancel adding sub-task">&times;</button>';
   h+='</div></div>';
   return h;
 }
@@ -1545,10 +1551,18 @@ function subAddKey(e,pid,ctx){
     var b=row&&row.querySelector(".st-add-btn");if(b)b.focus();
   }
 }
-function subAddBlur(el,pid,ctx){if(stBusy)return;if(!(el.value||"").trim())closeSubAdd(pid,ctx,el)}
+function collapseIfEmpty(pid){if(expandedSubtasks[pid]&&!stClosing[pid]&&!getSubtasksForItem(pid).length&&!(subAddOpen&&subAddOpen.pid===pid))toggleSubtaskExpand(pid)}
+function cancelSubAdd(pid,ctx){
+  var el=document.getElementById("sub-add-"+ctx+"-"+pid);
+  closeSubAdd(pid,ctx,el);collapseIfEmpty(pid);
+}
+function subAddBlur(el,pid,ctx){
+  if(stBusy)return;if((el.value||"").trim())return;
+  closeSubAdd(pid,ctx,el);setTimeout(function(){collapseIfEmpty(pid)},180);
+}
 function startAddSubtask(pid,ctx){
   var open=!!expandedSubtasks[pid];
-  if(open&&subAddOpen&&subAddOpen.pid===pid&&subAddOpen.ctx===ctx&&!getSubtasksForItem(pid).length){subAddOpen=null;toggleSubtaskExpand(pid);return}
+  if(open&&!getSubtasksForItem(pid).length){subAddOpen=null;toggleSubtaskExpand(pid);return}
   expandedSubtasks[pid]=true;saveSubOpen();subAddOpen={pid:pid,ctx:ctx};
   if(!open)stJustOpened=pid;
   stRefresh();stJustOpened=null;focusSubAdd(pid,ctx);
@@ -1659,6 +1673,7 @@ function addUpdate(){
   var text=document.getElementById("upd-text").value.trim();
   if(!text){alert("Update text is required");return}
   if(!date)date=new Date().toISOString().split("T")[0];
+  pushUndo();
   updates.push({id:uniqueId(),project:proj,date:date,text:text});
   saveUpdates();
   document.getElementById("upd-text").value="";
@@ -1666,6 +1681,7 @@ function addUpdate(){
 }
 function deleteUpdate(id){
   if(!confirm("Delete this update?"))return;
+  pushUndo();
   updates=updates.filter(function(u){return u.id!==id});
   saveUpdates();renderUpdates();
 }
@@ -1674,7 +1690,7 @@ function editUpdateText(id,el){
   var u=updates.find(function(x){return x.id===id});if(!u)return;
   var ta=document.createElement("textarea");ta.className="edit-text";ta.value=u.text;
   el.textContent="";el.appendChild(ta);ta.focus();ta.select();
-  function save(){var v=ta.value.trim();if(v&&v!==u.text){u.text=v;saveUpdates()}renderUpdates()}
+  function save(){var v=ta.value.trim();if(v&&v!==u.text){pushUndo();u.text=v;saveUpdates()}renderUpdates()}
   ta.addEventListener("blur",save);
   ta.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();save()}if(e.key==="Escape")renderUpdates()});
 }
@@ -1685,7 +1701,7 @@ function editUpdateDate(id,el){
   var inp=document.createElement("input");inp.type="date";inp.className="edit-date";inp.value=u.date;
   el.textContent="";el.appendChild(inp);if(projDiv){var d=document.createElement("div");d.innerHTML=projHtml;el.appendChild(d.firstChild)}
   inp.focus();
-  function save(){var v=inp.value;if(v&&v!==u.date){u.date=v;saveUpdates()}renderUpdates()}
+  function save(){var v=inp.value;if(v&&v!==u.date){pushUndo();u.date=v;saveUpdates()}renderUpdates()}
   inp.addEventListener("blur",save);inp.addEventListener("change",save);
   inp.addEventListener("keydown",function(e){if(e.key==="Escape")renderUpdates()});
 }
@@ -1695,7 +1711,7 @@ function editUpdateProject(id,el){
   var sel=document.createElement("select");sel.className="edit-project";
   projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;if(p===u.project)o.selected=true;sel.appendChild(o)});
   el.textContent="";el.appendChild(sel);sel.focus();
-  function save(){var v=sel.value;if(v!==u.project){u.project=v;saveUpdates()}renderUpdates()}
+  function save(){var v=sel.value;if(v!==u.project){pushUndo();u.project=v;saveUpdates()}renderUpdates()}
   sel.addEventListener("blur",save);sel.addEventListener("change",save);
   sel.addEventListener("keydown",function(e){if(e.key==="Escape")renderUpdates()});
 }
@@ -1873,7 +1889,23 @@ function loadItems(){
   return res;
 }
 function saveItems(){localStorage.setItem(STORAGE_KEY,JSON.stringify(items));localStorage.setItem(STORAGE_KEY+"_ver",String(EMBEDDED_VERSION))}
-function pushUndo(){undoStack.push(JSON.stringify(items));if(undoStack.length>MAX_UNDO)undoStack.shift();redoStack=[]}
+function undoSnapshot(){return JSON.stringify({items:items,updates:updates})}
+function pushUndo(){undoStack.push(undoSnapshot());if(undoStack.length>MAX_UNDO)undoStack.shift();redoStack=[]}
+function restoreSnapshot(s){var d=safeParseJSON(s,null);if(!d)return false;if(Array.isArray(d)){items=d}else{items=d.items||[];updates=d.updates||[]}saveItems();saveUpdates();return true}
+function undoRedo(isRedo){
+  var from=isRedo?redoStack:undoStack,to=isRedo?undoStack:redoStack;
+  if(!from.length){showUndoToast(isRedo?"Nothing to redo":"Nothing to undo");return}
+  to.push(undoSnapshot());
+  if(!restoreSnapshot(from.pop()))return;
+  subAddOpen=null;subEditing=null;
+  renderProjectTabs();populateProjectDropdown();refreshView();
+  showUndoToast(isRedo?"Redone":"Undone (Ctrl+Shift+Z to redo)");
+}
+function showUndoToast(msg){
+  var t=document.getElementById("undoToast");
+  if(!t){t=document.createElement("div");t.id="undoToast";t.className="undo-toast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show")},1800);
+}
 function getStatus(item){
   if(item.progress==="done")return"done";
   if(item.progress==="blocked")return"blocked";
@@ -2261,6 +2293,13 @@ document.getElementById("searchInput").addEventListener("input",function(){
 
 // Keyboard shortcuts
 document.addEventListener("keydown",function(e){
+  var k=(e.key||"").toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&!e.altKey&&(k==="z"||k==="y")){
+    var tg=e.target,tn=tg&&tg.tagName;
+    if(tn==="INPUT"||tn==="TEXTAREA"||tn==="SELECT"||(tg&&tg.isContentEditable))return;
+    if(document.querySelector(".modal-overlay.open,.modal.open"))return;
+    e.preventDefault();undoRedo(k==="y"||e.shiftKey);return;
+  }
   if((e.ctrlKey||e.metaKey)&&e.key==="n"){
     e.preventDefault();
     if(getViewTab()!=="all"){currentFilter="all";renderProjectTabs();refreshView()}
@@ -2281,7 +2320,8 @@ function activateViewTab(view){
   if(target)target.classList.add("active");
 }
 
-function isProjectName(p){return typeof p==="string"&&p!==""&&p.indexOf("__")!==0}
+var REMOVED_PROJECTS = ["LT7170-PSKIP", "OTHER TASKS", "Others"];
+function isProjectName(p){return typeof p==="string"&&p!==""&&p.indexOf("__")!==0&&REMOVED_PROJECTS.indexOf(p)===-1}
 function projectHasData(name){return items.some(function(i){return i.project===name})||updates.some(function(u){return u.project===name})}
 // Saved project order first, then any project found in items/updates (alphabetical)
 function getAllProjects(){
@@ -2359,7 +2399,7 @@ render();
 
 // What's New popup
 (function(){
-  var BUILD = "2026-10-20-v10";
+  var BUILD = "2026-10-20-v11";
   var SEEN_KEY = "ai_tracker_whats_new_seen";
   if(localStorage.getItem(SEEN_KEY)===BUILD)return;
   var overlay=document.createElement("div");
@@ -2372,6 +2412,9 @@ render();
     +'<li>All your projects now show as tabs; the More menu is gone</li>'
     +'<li>Cleaner layout: removed Owner, My AIs, Select, Manual Order and the archived toggle</li>'
     +'<li>Finished and archived items live in the Completed tab</li>'
+    +'<li>Ctrl+Z undoes your last change (tasks and updates); Ctrl+Shift+Z or Ctrl+Y redoes it</li>'
+    +'<li>Removed the LT7170-PSKIP, OTHER TASKS and Others project tabs</li>'
+    +'<li>Opened Add sub-task by mistake? Click + Sub again, click away, press Esc, or use the x to close it</li>'
     +'<li>Redesigned sub-tasks: a clean nested checklist under each task with a progress chip (like 1/3), quick done, edit and delete actions, and inline Add sub-task (Enter to add, Esc to cancel)</li>'
     +'<li>No more checkboxes: mark tasks and sub-tasks done with the &#10003; button next to edit and delete, in Table, Board and mobile cards</li>'
     +'<li>Board now has three columns (Not Started, In Progress, Blocked); finish a card with its &#10003; button</li>'
