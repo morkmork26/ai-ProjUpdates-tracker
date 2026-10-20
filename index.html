@@ -286,6 +286,8 @@ tr.drag-over td{border-top:2px solid #58a6ff}
 .mq-header .mq-icon{font-size:1rem}
 .mq-header .mq-title{font-size:.78rem;font-weight:700;letter-spacing:.5px}
 .mq-header .mq-count{font-size:.65rem;background:#21262d;padding:2px 8px;border-radius:8px;color:#8b949e}
+.mq-add-btn{margin-left:auto;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;padding:0;background:transparent;border:1px solid #30363d;border-radius:6px;color:#8b949e;font-size:1rem;font-weight:600;line-height:1;cursor:pointer;font-family:inherit;transition:color .2s,border-color .2s,background .2s}
+.mq-add-btn:hover,.mq-add-btn:focus-visible{color:#3fb950;border-color:#3fb950;background:#3fb95015}
 .mq-q1 .mq-header .mq-title{color:#f85149}
 .mq-q2 .mq-header .mq-title{color:#58a6ff}
 .mq-q3 .mq-header .mq-title{color:#d29922}
@@ -305,6 +307,7 @@ tr.drag-over td{border-top:2px solid #58a6ff}
 .matrix-axis-y{display:none}
 .matrix-quadrant{min-height:120px;border-right:none!important;border-bottom:1px solid #30363d}
 .matrix-row-label{display:block;font-size:.65rem;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.mq-add-btn{width:44px;height:44px;font-size:1.25rem;border-radius:10px}
 }
 
 /* Quadrant picker */
@@ -640,6 +643,8 @@ body.light .mq-q4{background:var(--gray-s);border-color:var(--border)}
 body.light .matrix-quadrant.drag-over{box-shadow:inset 0 0 0 2px var(--blue)}
 body.light .mq-header{border-bottom-color:var(--border)}
 body.light .mq-header .mq-count{background:var(--surface);color:var(--text-2);border:1px solid var(--border)}
+body.light .mq-add-btn{background:var(--surface);border-color:var(--border-ui);color:var(--text-2)}
+body.light .mq-add-btn:hover,body.light .mq-add-btn:focus-visible{color:var(--green);border-color:var(--green);background:var(--green-t)}
 body.light .mq-q1 .mq-header .mq-title{color:var(--red)}
 body.light .mq-q2 .mq-header .mq-title{color:var(--blue)}
 body.light .mq-q3 .mq-header .mq-title{color:var(--amber)}
@@ -1051,6 +1056,7 @@ function renderKanban(){
       touchDragCard=null;touchDragId=null;touchMoved=false;longPressActive=false;
     });
   })();
+  applyLayout();
 }
 function renderActivity(){
   var log=loadActivity();
@@ -1076,30 +1082,57 @@ function renderActivity(){
   }
   document.getElementById("activityFeed").innerHTML=html;
 }
-function showBoardView(){
-  boardView=true;
-  if(matrixView){matrixView=false;document.getElementById("matrixContainer").classList.remove("open");document.getElementById("segMatrix").classList.remove("active")}
-  document.querySelector(".table-wrap").style.display="none";
-  document.getElementById("mobileCards").classList.add("hidden");
-  document.getElementById("empty").style.display="none";
-  document.getElementById("kanbanContainer").classList.add("open");
-  document.getElementById("segBoard").classList.add("active");
-  document.getElementById("segTable").classList.remove("active");
-  renderKanban();
+var SEG_IDS={table:"segTable",board:"segBoard",matrix:"segMatrix"};
+function getViewTab(){return(typeof currentFilter==="string"&&currentFilter.indexOf("__")===0)?currentFilter:"all"}
+function applyLayout(){
+  var tab=getViewTab(),main=tab==="all",m=viewMode;
+  var showTable=main&&m==="table";
+  document.querySelector(".table-wrap").style.display=showTable?"":"none";
+  document.getElementById("mobileCards").classList.toggle("hidden",!showTable);
+  document.getElementById("empty").style.display=showTable&&tableRowCount===0?"block":"none";
+  document.getElementById("kanbanContainer").classList.toggle("open",main&&m==="board");
+  document.getElementById("matrixContainer").classList.toggle("open",main&&m==="matrix");
+  document.getElementById("updatesContainer").classList.toggle("open",tab==="__updates__");
+  document.getElementById("winsContainer").classList.toggle("open",tab==="__wins__");
+  document.getElementById("activityContainer").classList.toggle("open",tab==="__activity__");
+  Object.keys(SEG_IDS).forEach(function(k){document.getElementById(SEG_IDS[k]).classList.toggle("active",m===k)});
+  document.getElementById("filterBar").style.display=main?"":"none";
+  document.getElementById("projectTabsRow").style.display=main?"":"none";
+  document.querySelector(".summary").style.display=main?"":"none";
+  if(!main)closeAddForm();
+  activateViewTab(tab);
 }
-function hideBoardView(){
-  boardView=false;
-  document.querySelector(".table-wrap").style.display="";
-  document.getElementById("mobileCards").classList.remove("hidden");
-  document.getElementById("kanbanContainer").classList.remove("open");
-  document.getElementById("segTable").classList.add("active");
-  document.getElementById("segBoard").classList.remove("active");
+function setViewMode(mode){
+  viewMode=mode;
+  if(getViewTab()!=="all"){currentFilter="all";renderProjectTabs()}
+  refreshView();
 }
 function refreshView(){
-  if(matrixView)renderMatrix();
-  else if(boardView)renderKanban();
+  var tab=getViewTab();
+  if(tab==="__updates__")renderUpdates();
+  else if(tab==="__wins__")renderWins();
+  else if(tab==="__activity__")renderActivity();
+  else if(viewMode==="matrix")renderMatrix();
+  else if(viewMode==="board")renderKanban();
   else render();
+  applyLayout();
 }
+function setSelectValue(sel,val,addMissing){
+  if(!sel||!val)return false;
+  var has=Array.prototype.some.call(sel.options,function(o){return o.value===val});
+  if(!has){if(!addMissing)return false;var o=document.createElement("option");o.value=val;o.textContent=val;sel.appendChild(o)}
+  sel.value=val;return true;
+}
+function openAddForm(opts){
+  opts=opts||{};
+  var form=document.getElementById("addForm");
+  form.classList.add("open");document.getElementById("formBackdrop").classList.add("open");
+  if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0)setSelectValue(document.getElementById("f-project"),currentFilter,true);
+  if(opts.quadrant)document.querySelectorAll("#f-quadrant .qp-btn").forEach(function(b){b.classList.toggle("active",b.dataset.q===opts.quadrant)});
+  if(opts.scroll&&form.scrollIntoView)form.scrollIntoView({behavior:"smooth",block:"start"});
+  if(opts.focus)setTimeout(function(){document.getElementById("f-task").focus()},100);
+}
+function closeAddForm(){document.getElementById("addForm").classList.remove("open");document.getElementById("formBackdrop").classList.remove("open")}
 function getSelectedQuadrant(pickerId){
   var active=document.querySelector("#"+pickerId+" .qp-btn.active");
   return active?active.dataset.q:"q1";
@@ -1143,7 +1176,7 @@ function renderMatrix(){
   ["q1","q2","q3","q4"].forEach(function(qid){
     var el=document.querySelector('.matrix-quadrant[data-quadrant="'+qid+'"]');
     var lab=labels[qid];
-    var html='<div class="mq-header"><span class="mq-icon">'+lab.icon+'</span><span class="mq-title">'+lab.title+'</span><span class="mq-count">'+buckets[qid].length+'</span></div>';
+    var html='<div class="mq-header"><span class="mq-icon">'+lab.icon+'</span><span class="mq-title">'+lab.title+'</span><span class="mq-count">'+buckets[qid].length+'</span><button type="button" class="mq-add-btn" data-addq="'+qid+'" title="Add to '+lab.title+'" aria-label="Add action item to '+lab.title+'">+</button></div>';
     html+='<div class="matrix-row-label">'+lab.title+'</div>';
     if(!buckets[qid].length){
       html+='<div class="mq-empty">No items</div>';
@@ -1175,6 +1208,9 @@ function renderMatrix(){
       }
     }
     el.innerHTML=html;
+  });
+  document.querySelectorAll(".mq-add-btn").forEach(function(btn){
+    btn.addEventListener("click",function(e){e.stopPropagation();openAddForm({quadrant:btn.dataset.addq,focus:true,scroll:true})});
   });
   document.querySelectorAll("[data-expand]").forEach(function(btn){
     btn.addEventListener("click",function(){matrixExpanded[btn.dataset.expand]=true;renderMatrix()});
@@ -1265,6 +1301,7 @@ function renderMatrix(){
     });
   });
   initMatrixTouch();
+  applyLayout();
 }
 function matrixCycleProgress(id){
   pushUndo();
@@ -1374,37 +1411,9 @@ function initMatrixTouch(){
     touchCard=null;touchId=null;touchMoved=false;lpActive=false;
   });
 }
-function showMatrixView(){
-  matrixView=true;
-  document.querySelector(".table-wrap").style.display="none";
-  document.getElementById("mobileCards").classList.add("hidden");
-  document.getElementById("empty").style.display="none";
-  document.getElementById("kanbanContainer").classList.remove("open");
-  document.getElementById("matrixContainer").classList.add("open");
-  document.getElementById("segMatrix").classList.add("active");
-  document.getElementById("segTable").classList.remove("active");
-  document.getElementById("segBoard").classList.remove("active");
-  renderMatrix();
-}
-function hideMatrixView(){
-  matrixView=false;
-  document.getElementById("matrixContainer").classList.remove("open");
-  document.getElementById("segMatrix").classList.remove("active");
-}
 function showActivityView(){
-  document.querySelector(".table-wrap").style.display="none";
-  document.querySelector(".add-form").classList.remove("open");
-  document.getElementById("empty").style.display="none";
-  document.querySelector(".summary").style.display="none";
-  document.getElementById("mobileCards").classList.add("hidden");
-  document.getElementById("updatesContainer").classList.remove("open");
-  document.getElementById("winsContainer").classList.remove("open");
-  document.getElementById("kanbanContainer").classList.remove("open");
-  document.getElementById("activityContainer").classList.add("open");
   renderActivity();
-}
-function hideActivityView(){
-  document.getElementById("activityContainer").classList.remove("open");
+  applyLayout();
 }
 function updateBulkBar(){
   var bar=document.getElementById("bulkBar");
@@ -1583,11 +1592,8 @@ function addUpdate(){
   if(!date)date=new Date().toISOString().split("T")[0];
   updates.push({id:uniqueId(),project:proj,date:date,text:text});
   saveUpdates();
-  var keepProj=document.getElementById("upd-project").value;
   document.getElementById("upd-text").value="";
   renderUpdates();
-  var projSel=document.getElementById("upd-project");
-  if(keepProj&&projSel.querySelector('option[value="'+keepProj+'"]'))projSel.value=keepProj;
 }
 function deleteUpdate(id){
   if(!confirm("Delete this update?"))return;
@@ -1671,23 +1677,14 @@ function renderUpdates(){
     });
   }
   document.getElementById("timeline").innerHTML=html;
-  var sel=document.getElementById("upd-project");sel.innerHTML="";
+  var sel=document.getElementById("upd-project");var prevProj=sel.value;sel.innerHTML="";
   projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;sel.appendChild(o)});
+  if(updatesFilter!=="all")setSelectValue(sel,updatesFilter,true);
+  else setSelectValue(sel,prevProj,false);
 }
 function showWinsView(){
-  document.querySelector(".table-wrap").style.display="none";
-  document.querySelector(".add-form").classList.remove("open");
-  document.getElementById("empty").style.display="none";
-  document.querySelector(".summary").style.display="none";
-  document.getElementById("mobileCards").classList.add("hidden");
-  document.getElementById("updatesContainer").classList.remove("open");
-  document.getElementById("kanbanContainer").classList.remove("open");
-  document.getElementById("activityContainer").classList.remove("open");
-  document.getElementById("winsContainer").classList.add("open");
   renderWins();
-}
-function hideWinsView(){
-  document.getElementById("winsContainer").classList.remove("open");
+  applyLayout();
 }
 function renderWins(){
   var done=items.filter(function(i){return i.progress==="done"&&i.completedAt});
@@ -1755,33 +1752,16 @@ function renderWins(){
   document.getElementById("winsTimeline").innerHTML=html;
 }
 function showUpdatesView(){
-  document.querySelector(".table-wrap").style.display="none";
-  document.querySelector(".add-form").classList.remove("open");
-  document.getElementById("empty").style.display="none";
-  document.querySelector(".summary").style.display="none";
-  document.getElementById("mobileCards").classList.add("hidden");
-  document.getElementById("winsContainer").classList.remove("open");
-  document.getElementById("kanbanContainer").classList.remove("open");
-  document.getElementById("activityContainer").classList.remove("open");
-  document.getElementById("updatesContainer").classList.add("open");
   document.getElementById("upd-date").value=new Date().toISOString().split("T")[0];
   renderUpdates();
-  var projSel=document.getElementById("upd-project");
-  if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0&&projSel.querySelector('option[value="'+currentFilter+'"]'))projSel.value=currentFilter;
-}
-function hideUpdatesView(){
-  document.querySelector(".table-wrap").style.display="";
-  document.querySelector(".summary").style.display="";
-  document.getElementById("mobileCards").classList.remove("hidden");
-  document.getElementById("updatesContainer").classList.remove("open");
-  document.getElementById("activityContainer").classList.remove("open");
+  applyLayout();
 }
 var MY_NAMES = ["mb","mark","lester","mark lester"];
 var undoStack = [], redoStack = [], MAX_UNDO = 20;
 var hideDone = true, manualSort = false, showMineOnly = false;
 var currentFilter = "all", sortCol = "dueDate", sortAsc = true, dragId = null;
 var items = [], projects = [];
-var searchQuery = "", thisWeekMode = false, boardView = false, matrixView = false, selectMode = false, showArchived = false;
+var searchQuery = "", thisWeekMode = false, viewMode = "table", tableRowCount = 0, selectMode = false, showArchived = false;
 var selectedItems = [];
 var ACTIVITY_KEY = "ai_tracker_activity";
 var ARCHIVE_DAYS = 14;
@@ -1971,7 +1951,7 @@ function render(){
   });
   tbody.innerHTML=h;
   console.log("[AI-TRACKER DEBUG] items:",items.length,"filtered:",filtered.length,"rows in h:",(h.match(/data-id=/g)||[]).length);
-  document.getElementById("empty").style.display=filtered.length?"none":"block";
+  tableRowCount=filtered.length;
   if(manualSort){
     tbody.querySelectorAll("tr[draggable]").forEach(function(row){
       row.addEventListener("dragstart",function(){dragId=+row.dataset.id;row.style.opacity="0.4"});
@@ -1997,6 +1977,7 @@ function render(){
   document.getElementById("summary").innerHTML='<div class="card notstarted"><div class="card-value">'+ns+'</div><div class="card-label">Not Started</div></div><div class="card inprog"><div class="card-value">'+ip+'</div><div class="card-label">In Progress</div></div><div class="card blocked"><div class="card-value">'+bl+'</div><div class="card-label">Blocked</div></div><div class="card overdue"><div class="card-value">'+od+'</div><div class="card-label">Overdue</div></div><div class="card done"><div class="card-value">'+dn+'</div><div class="card-label">Done</div></div>';
   // Mobile cards render
   renderMobileCards(filtered);
+  applyLayout();
 }
 function renderMobileCards(filtered){
   var mc=document.getElementById("mobileCards");
@@ -2092,8 +2073,8 @@ document.getElementById("toggleSort").addEventListener("click",function(){manual
 document.getElementById("toggleMine").addEventListener("click",function(){showMineOnly=!showMineOnly;this.textContent=showMineOnly?"All AIs":"My AIs";this.classList.toggle("active",showMineOnly);refreshView()});
 document.getElementById("toggleTheme").addEventListener("click",function(){var c=localStorage.getItem(THEME_KEY)||"light";var n=c==="dark"?"light":"dark";localStorage.setItem(THEME_KEY,n);applyTheme(n)});
 
-document.getElementById("addBtn").addEventListener("click",function(){var form=document.getElementById("addForm");var bd=document.getElementById("formBackdrop");form.classList.toggle("open");bd.classList.toggle("open",form.classList.contains("open"));var sel=document.getElementById("f-project");if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0){sel.value=currentFilter}});
-document.getElementById("formBackdrop").addEventListener("click",function(){document.getElementById("addForm").classList.remove("open");this.classList.remove("open")});
+document.getElementById("addBtn").addEventListener("click",function(){if(document.getElementById("addForm").classList.contains("open"))closeAddForm();else openAddForm()});
+document.getElementById("formBackdrop").addEventListener("click",closeAddForm);
 document.getElementById("submitBtn").addEventListener("click",function(){
   var task=document.getElementById("f-task").value.trim();if(!task){alert("Task is required");return}
   pushUndo();
@@ -2276,24 +2257,7 @@ document.getElementById("toggleWeek").addEventListener("click",function(){
 });
 
 // Segmented control (Table/Board/Matrix)
-document.getElementById("segTable").addEventListener("click",function(){
-  if(boardView)hideBoardView();
-  if(matrixView)hideMatrixView();
-  document.getElementById("segTable").classList.add("active");
-  document.getElementById("segBoard").classList.remove("active");
-  document.getElementById("segMatrix").classList.remove("active");
-  document.querySelector(".table-wrap").style.display="";
-  document.getElementById("mobileCards").classList.remove("hidden");
-  render();
-});
-document.getElementById("segBoard").addEventListener("click",function(){
-  if(matrixView)hideMatrixView();
-  if(!boardView)showBoardView();
-});
-document.getElementById("segMatrix").addEventListener("click",function(){
-  if(boardView)hideBoardView();
-  if(!matrixView)showMatrixView();
-});
+Object.keys(SEG_IDS).forEach(function(k){document.getElementById(SEG_IDS[k]).addEventListener("click",function(){setViewMode(k)})});
 
 // Select mode toggle
 document.getElementById("toggleSelect").addEventListener("click",toggleSelectMode);
@@ -2316,9 +2280,8 @@ document.addEventListener("keydown",function(e){
   if(e.key==="Escape"&&selectMode){toggleSelectMode();return}
   if((e.ctrlKey||e.metaKey)&&e.key==="n"){
     e.preventDefault();
-    document.getElementById("addForm").classList.add("open");
-    var sel=document.getElementById("f-project");if(currentFilter&&currentFilter!=="all"&&currentFilter.indexOf("__")!==0){sel.value=currentFilter}
-    setTimeout(function(){document.getElementById("f-task").focus()},100);
+    if(getViewTab()!=="all"){currentFilter="all";renderProjectTabs();refreshView()}
+    openAddForm({focus:true});
   }
   if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){
     if(document.getElementById("addForm").classList.contains("open")){
@@ -2393,12 +2356,8 @@ function renderProjectTabs(){
     btn.dataset.project=p;btn.textContent=p;btn.setAttribute("draggable","true");
     btn.addEventListener("click",function(){
       currentFilter=p;
-      activateViewTab("all");
-      hideUpdatesView();hideWinsView();hideActivityView();
       renderProjectTabs();
       refreshView();
-      document.getElementById("filterBar").style.display="";
-      document.querySelector(".summary").style.display="";
     });
     row.insertBefore(btn,moreWrap);
   });
@@ -2412,13 +2371,9 @@ function renderProjectTabs(){
       if(currentFilter===p)btn.classList.add("active");
       btn.addEventListener("click",function(){
         currentFilter=p;
-        activateViewTab("all");
-        hideUpdatesView();hideWinsView();hideActivityView();
         renderProjectTabs();
         dd.classList.remove("open");
         refreshView();
-        document.getElementById("filterBar").style.display="";
-        document.querySelector(".summary").style.display="";
       });
       dd.appendChild(btn);
     });
@@ -2429,32 +2384,12 @@ function renderProjectTabs(){
 document.querySelectorAll(".view-tab").forEach(function(vt){
   vt.addEventListener("click",function(){
     var view=vt.dataset.view;
-    activateViewTab(view);
-    // Deactivate project tabs
     document.querySelectorAll(".proj-tab").forEach(function(t){t.classList.remove("active")});
-    if(view==="all"){
-      currentFilter="all";
-      hideUpdatesView();hideWinsView();hideActivityView();
-      document.getElementById("filterBar").style.display="";
-      document.querySelector(".summary").style.display="";
-      document.getElementById("projectTabsRow").style.display="";
-      refreshView()
-    }else if(view==="__updates__"){
-      currentFilter="__updates__";
-      hideWinsView();hideActivityView();showUpdatesView();
-      document.getElementById("filterBar").style.display="none";
-      document.getElementById("projectTabsRow").style.display="none";
-    }else if(view==="__wins__"){
-      currentFilter="__wins__";
-      hideUpdatesView();hideActivityView();showWinsView();
-      document.getElementById("filterBar").style.display="none";
-      document.getElementById("projectTabsRow").style.display="none";
-    }else if(view==="__activity__"){
-      currentFilter="__activity__";
-      hideUpdatesView();hideWinsView();hideBoardView();hideMatrixView();showActivityView();
-      document.getElementById("filterBar").style.display="none";
-      document.getElementById("projectTabsRow").style.display="none";
-    }
+    currentFilter=view==="__updates__"||view==="__wins__"||view==="__activity__"?view:"all";
+    if(view==="__updates__")showUpdatesView();
+    else if(view==="__wins__")showWinsView();
+    else if(view==="__activity__")showActivityView();
+    else refreshView();
   });
 });
 
@@ -2502,7 +2437,7 @@ render();
 
 // What's New popup
 (function(){
-  var BUILD = "2026-10-20-v7";
+  var BUILD = "2026-10-20-v8";
   var SEEN_KEY = "ai_tracker_whats_new_seen";
   if(localStorage.getItem(SEEN_KEY)===BUILD)return;
   var overlay=document.createElement("div");
@@ -2512,10 +2447,9 @@ render();
   box.innerHTML='<h2 style="margin:0 0 8px;color:var(--pop-title);font-size:1.2rem">&#127881; What\'s New</h2>'
     +'<p style="font-size:.75rem;color:var(--pop-sub);margin:0 0 16px">Build: '+BUILD+'</p>'
     +'<ul style="padding-left:18px;margin:0 0 20px;font-size:.85rem;line-height:1.8;color:var(--pop-text)">'
-    +'<li>New light mode (now the default): soft gray paper tones, no harsh white</li>'
-    +'<li>High-contrast text and status colors across every view (WCAG AA)</li>'
-    +'<li>Done items stay readable in light mode (muted, not faded)</li>'
-    +'<li>Switch anytime via the overflow menu: Dark Mode / Light Mode</li>'
+    +'<li>Matrix view: tap + on any quadrant to add an item straight into it</li>'
+    +'<li>Updates tab: the project dropdown now follows the project filter you pick</li>'
+    +'<li>Fixed Table and Board sometimes showing at the same time; only one view shows now</li>'
     +'</ul>'
     +'<button id="wnDismiss" style="background:var(--pop-btn);border:none;color:#fff;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;width:100%">Got it!</button>';
   overlay.appendChild(box);
