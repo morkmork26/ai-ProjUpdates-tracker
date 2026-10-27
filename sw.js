@@ -1,4 +1,4 @@
-var CACHE_NAME = 'ai-tracker-v10';
+var CACHE_NAME = 'ai-tracker-v11';
 var urlsToCache = [
   '/ai-ProjUpdates-tracker/',
   '/ai-ProjUpdates-tracker/index.html',
@@ -16,7 +16,7 @@ self.addEventListener('install', function(event) {
 
 self.addEventListener('fetch', function(event) {
   var url = event.request.url;
-  if (url.indexOf('script.google.com') !== -1 || url.indexOf('googleapis.com') !== -1) {
+  if (url.indexOf('script.google.com') !== -1 || url.indexOf('script.googleusercontent.com') !== -1 || url.indexOf('googleapis.com') !== -1) {
     return;
   }
   if (event.request.method !== 'GET') {

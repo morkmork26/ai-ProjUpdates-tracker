@@ -705,6 +705,111 @@ body.light .add-form{box-shadow:0 -8px 32px rgba(16,24,40,.18)}
 body.light .add-form::after{background:var(--border-ui)}
 body.light .matrix-quadrant{border-bottom-color:var(--border)}
 }
+.ph-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px;border:1.5px dashed #30363d;border-radius:10px;background:#0d111799;transition:border-color .2s,background .2s}
+.ph-bar.ph-drag{border-color:#58a6ff;background:#58a6ff14}
+.ph-bar.ph-list,.ph-bar.ph-ro{border:none;background:none;padding:0;gap:6px;margin-top:8px}
+.ph-bar.ph-list:not(.has-photos),.ph-bar.ph-ro:not(.has-photos){display:none}
+.ph-bar.ph-list.ph-drag{outline:1.5px dashed #58a6ff;outline-offset:4px;border-radius:8px}
+.ph-notes{margin-top:8px}
+.ph-thumb{position:relative;flex:none;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #30363d;background:#161b22;cursor:zoom-in;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s,box-shadow .15s}
+.ph-thumb:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.ph-thumb:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
+.ph-list .ph-thumb,.ph-ro .ph-thumb{width:56px;height:56px}
+.ph-thumb img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s}
+.ph-thumb:hover img{transform:scale(1.06)}
+.ph-thumb.loading::after,.ph-busy::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.08) 50%,transparent 70%);background-size:200% 100%;animation:phShimmer 1.2s linear infinite}
+.ph-thumb.missing{cursor:default}
+.ph-thumb.missing::before{content:'\26A0';position:absolute;inset:0;display:grid;place-items:center;color:#8b949e;font-size:1rem}
+.ph-thumb.unsynced::before{content:'';position:absolute;left:5px;bottom:5px;width:8px;height:8px;border-radius:50%;background:#d29922;box-shadow:0 0 0 2px #0d1117;z-index:1}
+.ph-busy{cursor:progress;display:grid;place-items:center}
+.ph-spin,.ph-lb-spin{width:18px;height:18px;border-radius:50%;border:2px solid #58a6ff44;border-top-color:#58a6ff;animation:phSpin .8s linear infinite}
+@keyframes phSpin{to{transform:rotate(360deg)}}
+@keyframes phShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.ph-del{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(13,17,23,.78);color:#fff;font-size:14px;line-height:22px;text-align:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s;z-index:2}
+.ph-del:hover{background:#f85149}
+.ph-thumb:hover .ph-del,.ph-thumb:focus-within .ph-del{opacity:1}
+@media(hover:none){.ph-del{opacity:1}}
+.ph-add{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;border:1px solid #30363d;background:#21262d;color:#c9d1d9;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+.ph-add:hover{border-color:#58a6ff;color:#58a6ff}
+.ph-add-ic{font-size:.95rem;line-height:1}
+.ph-hint{font-size:.72rem;color:#8b949e}
+.ph-badge{display:inline-flex;align-items:center;gap:3px;margin-left:8px;padding:1px 8px;border-radius:999px;border:1px solid transparent;background:#a371f71f;color:#a371f7;font:inherit;font-size:.66rem;font-weight:600;line-height:1.6;cursor:pointer;vertical-align:middle;transition:border-color .15s}
+.ph-badge:hover{border-color:#a371f7}
+.kc-meta .ph-badge,.mc-meta .ph-badge,.mobile-card-meta .ph-badge{margin-left:0}
+.ph-badge-slot:empty{display:none}
+.timeline-entry .entry-main{flex:1;min-width:0}
+.timeline-entry .entry-actions{display:flex;align-items:flex-start;gap:2px}
+.timeline-entry .entry-attach{background:none;border:none;color:#484f58;cursor:pointer;font-size:.85rem;padding:2px 6px;opacity:.7;transition:color .2s,opacity .2s}
+.timeline-entry .entry-attach:hover{color:#58a6ff;opacity:1}
+.timeline-entry .done-comment{margin-top:6px;padding:6px 10px;border-left:2px solid #3fb95066;background:#3fb9500f;border-radius:0 6px 6px 0;color:#c9d1d9;font-size:.82rem;line-height:1.5}
+.win-card .win-note{margin-top:8px;padding:6px 10px;border-left:2px solid #3fb95066;background:#3fb9500f;border-radius:0 6px 6px 0;color:#c9d1d9;font-size:.8rem;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.done-modal{width:min(540px,calc(100vw - 32px))}
+.dm-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px}
+.dm-head h3{margin:0 0 4px}
+.dm-check{flex:none;width:40px;height:40px;border-radius:50%;background:#3fb95022;color:#3fb950;display:grid;place-items:center;font-size:1.15rem;font-weight:700}
+.dm-task{font-size:.88rem;color:#8b949e;line-height:1.4;overflow-wrap:anywhere}
+.dm-warn{margin-bottom:14px;padding:8px 12px;border-radius:8px;border:1px solid #d2992255;background:#d2992214;color:#d29922;font-size:.8rem}
+.done-modal textarea{min-height:96px;width:100%;resize:vertical;font-family:inherit}
+.dm-hint{margin-top:12px;font-size:.75rem;color:#8b949e}
+.dm-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:18px}
+.ps-modal{width:min(520px,calc(100vw - 32px))}
+.ps-desc{font-size:.82rem;line-height:1.55;color:#8b949e;margin-bottom:14px}
+.ps-desc code{font-size:.78rem;padding:1px 5px;border-radius:4px;background:#21262d}
+.ps-modal input{width:100%}
+.ps-status{margin-top:14px;padding:10px 12px;border-radius:8px;background:#0d1117;border:1px solid #30363d;font-size:.78rem;line-height:1.6;color:#8b949e}
+.ps-status .ok{color:#3fb950;font-weight:600}
+.ps-status .warn{color:#d29922;font-weight:600}
+.ps-status .err{color:#f85149;font-weight:600}
+.ps-actions{justify-content:space-between}
+.ps-actions .ps-right{display:flex;gap:10px;flex-wrap:wrap}
+body.ph-lb-open{overflow:hidden}
+.ph-lightbox{position:fixed;inset:0;z-index:10000;display:none;flex-direction:column;background:rgba(6,9,14,.94);backdrop-filter:blur(4px);color:#e6edf3;animation:phFade .18s ease}
+.ph-lightbox.open{display:flex}
+@keyframes phFade{from{opacity:0}to{opacity:1}}
+.ph-lb-top{display:flex;align-items:center;gap:14px;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top))}
+.ph-lb-count{flex:none;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.1)}
+.ph-lb-cap{flex:1;min-width:0;font-size:.78rem;color:#aab4c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-lb-tools{display:flex;gap:6px}
+.ph-lb-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e6edf3;font-size:1.05rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
+.ph-lb-btn:hover{background:rgba(255,255,255,.14)}
+.ph-lb-btn.danger:hover{background:#f8514933;border-color:#f85149}
+.ph-lb-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px 64px calc(24px + env(safe-area-inset-bottom))}
+.ph-lb-stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6);user-select:none}
+.ph-lb-stage .ph-lb-spin{position:absolute;display:none;width:28px;height:28px;border-width:3px}
+.ph-lb-stage.loading .ph-lb-spin{display:block}
+.ph-lb-stage.failed::after{content:'Could not load this photo';position:absolute;bottom:40px;font-size:.85rem;color:#f85149}
+.ph-lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;font-size:1.8rem;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .15s}
+.ph-lb-nav:hover{background:rgba(255,255,255,.18)}
+.ph-lb-nav.prev{left:10px}
+.ph-lb-nav.next{right:10px}
+.ph-lb-nav[hidden]{display:none}
+@media(max-width:768px){.ph-lb-stage{padding:4px 8px calc(16px + env(safe-area-inset-bottom))}.ph-lb-nav{width:40px;height:40px;font-size:1.5rem;background:rgba(0,0,0,.45)}.ph-hint{display:none}}
+@media(prefers-reduced-motion:reduce){.ph-thumb,.ph-thumb img,.ph-lightbox{transition:none;animation:none}.ph-thumb.loading::after,.ph-busy::after{animation:none}}
+body.light .ph-bar{border-color:var(--border-ui);background:var(--sunk)}
+body.light .ph-bar.ph-list,body.light .ph-bar.ph-ro{background:none}
+body.light .ph-bar.ph-drag{border-color:var(--blue);background:var(--blue-s)}
+body.light .ph-thumb{border-color:var(--border);background:var(--input);box-shadow:var(--sh-1)}
+body.light .ph-thumb:hover{box-shadow:var(--sh-2)}
+body.light .ph-thumb.unsynced::before{background:#a86a00;box-shadow:0 0 0 2px #fff}
+body.light .ph-thumb.missing::before{color:var(--text-3)}
+body.light .ph-thumb.loading::after,body.light .ph-busy::after{background:linear-gradient(100deg,transparent 30%,rgba(16,24,40,.07) 50%,transparent 70%);background-size:200% 100%}
+body.light .ph-add{background:var(--surface);border-color:var(--border-ui);color:var(--text-2)}
+body.light .ph-add:hover{border-color:var(--blue);color:var(--blue)}
+body.light .ph-hint{color:var(--text-3)}
+body.light .ph-badge{background:var(--purple-t);color:var(--purple)}
+body.light .ph-badge:hover{border-color:var(--purple)}
+body.light .timeline-entry .entry-attach{color:var(--text-3)}
+body.light .timeline-entry .entry-attach:hover{color:var(--blue)}
+body.light .timeline-entry .done-comment,body.light .win-card .win-note{color:var(--text);background:var(--green-s);border-left-color:var(--green)}
+body.light .dm-check{background:var(--green-t);color:var(--green)}
+body.light .dm-task,body.light .dm-hint,body.light .ps-desc{color:var(--text-2)}
+body.light .dm-warn{background:var(--amber-s);border-color:var(--amber-t);color:var(--amber)}
+body.light .ps-desc code{background:var(--hover);color:var(--text)}
+body.light .ps-status{background:var(--sunk);border-color:var(--border);color:var(--text-2)}
+body.light .ps-status .ok{color:var(--green)}
+body.light .ps-status .warn{color:var(--amber)}
+body.light .ps-status .err{color:var(--red)}
+body.light .ph-spin{border-color:#0a50b533;border-top-color:var(--blue)}
 </style>
 </head>
 <body>
@@ -727,6 +832,7 @@ body.light .matrix-quadrant{border-bottom-color:var(--border)}
     <button class="overflow-btn" id="overflowBtn" title="More actions">&#8943;</button>
     <div class="overflow-dropdown" id="overflowDropdown">
       <button id="toggleTheme"><span class="od-icon">&#9790;</span>Toggle Theme</button>
+      <button id="photoSyncBtn"><span class="od-icon">&#9729;</span>Photo Sync</button>
     </div>
   </div>
 </div>
@@ -754,7 +860,7 @@ body.light .matrix-quadrant{border-bottom-color:var(--border)}
 <div id="tabs" style="display:none"><button class="tab active" data-filter="all">All</button></div>
 <button id="toggleBoard" style="display:none"></button>
 <div class="form-backdrop" id="formBackdrop"></div>
-<div class="add-form" id="addForm">
+<div class="add-form" id="addForm" data-ph-zone>
   <div class="form-grid">
     <div class="form-group"><label>Project</label><select id="f-project"></select></div>
     <div class="form-group"><label>Task</label><input type="text" id="f-task" placeholder="What needs to be done?"></div>
@@ -763,6 +869,7 @@ body.light .matrix-quadrant{border-bottom-color:var(--border)}
     <div class="form-group"><label>Source</label><input type="text" id="f-source" placeholder="Meeting, email, etc."></div>
   </div>
   <div class="form-group" style="margin-top:12px"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Additional details..."></textarea></div>
+  <div class="form-group" style="margin-top:12px"><label>Photos (optional)</label><div class="ph-bar" data-ph-target="pending:add" data-ph-mode="full"></div></div>
   <div class="form-actions"><button class="btn-submit" id="submitBtn">Add Action Item</button></div>
   <div class="shortcut-hint">Shortcuts: Ctrl+N to open form | Ctrl+Enter to submit</div>
 </div>
@@ -777,7 +884,7 @@ body.light .matrix-quadrant{border-bottom-color:var(--border)}
   </div>
 </div>
 <div class="modal-overlay" id="editModal">
-  <div class="modal-content" style="min-width:400px">
+  <div class="modal-content" style="min-width:400px" data-ph-zone>
     <h3>Edit Task</h3>
     <input type="hidden" id="edit-id">
     <div class="form-grid">
@@ -787,12 +894,39 @@ body.light .matrix-quadrant{border-bottom-color:var(--border)}
       <div class="form-group"><label>Placement</label><div class="quadrant-picker" id="edit-quadrant"><button type="button" class="qp-btn qp-q1" data-q="q1">🔥 Do First</button><button type="button" class="qp-btn qp-q2" data-q="q2">📅 Schedule</button><button type="button" class="qp-btn qp-q3" data-q="q3">📤 Delegate</button><button type="button" class="qp-btn qp-q4" data-q="q4">🗑️ Eliminate</button></div></div>
       <div class="form-group"><label>Source</label><input type="text" id="edit-source"></div>
     </div>
+    <div class="form-group" style="margin-top:12px"><label>Photos (saved instantly)</label><div class="ph-bar" id="edit-photos" data-ph-target="" data-ph-mode="full"></div></div>
     <div style="margin-top:16px;display:flex;gap:12px">
       <button class="btn-submit" id="saveEdit">Save</button>
       <button class="btn" id="cancelEdit">Cancel</button>
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="doneModal">
+  <div class="modal-content done-modal" data-ph-zone role="dialog" aria-modal="true" aria-labelledby="dm-title">
+    <div class="dm-head"><div class="dm-check">&#10003;</div><div><h3 id="dm-title">Mark as done</h3><div class="dm-task" id="dm-task"></div></div></div>
+    <div class="dm-warn" id="dm-warn" style="display:none"></div>
+    <div class="form-group"><label for="dm-comment">Completion comment (optional)</label><textarea id="dm-comment" placeholder="Outcome, decision, who was informed, link to the report..."></textarea></div>
+    <div class="form-group" style="margin-top:12px"><label>Photos (optional)</label><div class="ph-bar" data-ph-target="pending:done" data-ph-mode="full"></div></div>
+    <div class="dm-hint">Posted to the Updates tab under <b id="dm-proj"></b> together with the completion entry.</div>
+    <div class="dm-actions"><button class="btn" id="dm-cancel">Cancel</button><button class="btn-submit" id="dm-confirm">&#10003; Mark Done</button></div>
+    <div class="shortcut-hint">Ctrl+Enter to confirm | Esc to cancel</div>
+  </div>
+</div>
+<div class="modal-overlay" id="photoSyncModal">
+  <div class="modal-content ps-modal" role="dialog" aria-modal="true" aria-labelledby="ps-title">
+    <h3 id="ps-title">Photo Sync (Google Drive)</h3>
+    <p class="ps-desc">Photos always save on this device first. Connect your Photo Sync web app to back them up to Google Drive and see them on every device. Setup steps are at the top of <code>apps-script/photos.gs</code> in the repo. The URL and key stay in this browser only.</p>
+    <div class="form-group"><label for="ps-url">Web app URL</label><input type="url" id="ps-url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" spellcheck="false"></div>
+    <div class="form-group" style="margin-top:10px"><label for="ps-key">Access key</label><input type="password" id="ps-key" placeholder="Same value as PHOTO_KEY in the script" autocomplete="off"></div>
+    <div class="ps-status" id="ps-status"></div>
+    <div class="dm-actions ps-actions"><button class="btn" id="ps-disconnect">Disconnect</button><div class="ps-right"><button class="btn" id="ps-close">Close</button><button class="btn" id="ps-test">Test</button><button class="btn-submit" id="ps-save">Save &amp; Sync</button></div></div>
+  </div>
+</div>
+<div class="ph-lightbox" id="phLightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="ph-lb-top"><span class="ph-lb-count" id="phLbCount"></span><span class="ph-lb-cap" id="phLbCap"></span><div class="ph-lb-tools"><a class="ph-lb-btn" id="phLbDl" href="#" download title="Download" aria-label="Download">&#11015;</a><button type="button" class="ph-lb-btn danger" id="phLbDel" title="Delete photo" aria-label="Delete photo">&#128465;</button><button type="button" class="ph-lb-btn" id="phLbClose" title="Close (Esc)" aria-label="Close">&times;</button></div></div>
+  <div class="ph-lb-stage" id="phLbStage"><button type="button" class="ph-lb-nav prev" id="phLbPrev" aria-label="Previous photo">&#8249;</button><img id="phLbImg" alt=""><div class="ph-lb-spin"></div><button type="button" class="ph-lb-nav next" id="phLbNext" aria-label="Next photo">&#8250;</button></div>
+</div>
+<input type="file" id="phFileInput" accept="image/*" multiple hidden>
 <div class="table-wrap"><table>
 <thead><tr><th class="ns"></th><th data-sort="id">#</th><th data-sort="project">Project</th><th data-sort="task">Task / Progress</th><th data-sort="dueDate">Due</th><th data-sort="source">Source</th><th class="ns"></th></tr></thead>
 <tbody id="tbody"></tbody>
@@ -805,13 +939,14 @@ body.light .matrix-quadrant{border-bottom-color:var(--border)}
   <div id="winsTimeline"></div>
 </div>
 <div class="updates-container" id="updatesContainer">
-  <div class="update-form">
+  <div class="update-form" data-ph-zone>
     <div class="form-grid">
       <div class="form-group"><label>Project</label><select id="upd-project"></select></div>
       <div class="form-group"><label>Date</label><input type="date" id="upd-date"></div>
       <div class="form-group"><label>Update</label><textarea id="upd-text" placeholder="What happened? Status change, decision, milestone..." style="min-height:38px"></textarea></div>
       <div><button class="btn-submit" id="submitUpdate" style="padding:10px 20px">Add</button></div>
     </div>
+    <div class="ph-bar" data-ph-target="pending:upd" data-ph-mode="full" style="margin-top:12px"></div>
   </div>
   <div class="updates-filter" id="updatesFilter"></div>
   <div class="timeline" id="timeline"></div>
@@ -838,6 +973,498 @@ body.light .matrix-quadrant{border-bottom-color:var(--border)}
 <div class="activity-container" id="activityContainer">
   <div class="activity-feed" id="activityFeed"></div>
 </div>
+<script>
+var PH={db:null,meta:{},urls:{},full:{},loading:{},pending:{},busy:{},fileTarget:null,chain:Promise.resolve(),syncing:null,lastSync:null,lastError:"",errToasted:false,lb:null,cloudLoaded:false};
+var PH_CFG_KEY="ai_tracker_photo_sync",PH_DEL_KEY="ai_tracker_photo_dels";
+var PH_MAX_FULL=1920,PH_MAX_THUMB=360,PH_Q_FULL=.86,PH_Q_THUMB=.72,PH_MAX_INPUT=30*1024*1024,PH_ORPHAN_DAYS=7;
+function phNoop(){}
+function phNewId(){return"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function phToast(m){if(typeof showUndoToast==="function")showUndoToast(m)}
+function phIsPending(o){return String(o).indexOf("pending:")===0}
+function phDB(){
+  if(PH.db)return Promise.resolve(PH.db);
+  return new Promise(function(res,rej){
+    if(!window.indexedDB){rej(new Error("IndexedDB unavailable"));return}
+    var r=indexedDB.open("ai_tracker_photos",1);
+    r.onupgradeneeded=function(){var d=r.result;if(!d.objectStoreNames.contains("meta"))d.createObjectStore("meta",{keyPath:"id"});if(!d.objectStoreNames.contains("blobs"))d.createObjectStore("blobs")};
+    r.onsuccess=function(){PH.db=r.result;res(PH.db)};
+    r.onerror=function(){rej(r.error)};
+  });
+}
+function phReq(store,mode,fn){
+  return phDB().then(function(d){return new Promise(function(res,rej){
+    var tx=d.transaction(store,mode),rq=fn(tx.objectStore(store)),out;
+    if(rq)rq.onsuccess=function(){out=rq.result};
+    tx.oncomplete=function(){res(out)};tx.onerror=function(){rej(tx.error)};tx.onabort=function(){rej(tx.error)};
+  })});
+}
+function phPutMeta(m){var c={};Object.keys(m).forEach(function(k){c[k]=m[k]});return phReq("meta","readwrite",function(s){return s.put(c)})}
+function phDelMeta(id){return phReq("meta","readwrite",function(s){return s.delete(id)})}
+function phPutBlob(k,b){return phReq("blobs","readwrite",function(s){return s.put(b,k)})}
+function phGetBlob(k){return phReq("blobs","readonly",function(s){return s.get(k)})}
+function phDelBlob(k){return phReq("blobs","readwrite",function(s){return s.delete(k)})}
+function phAllMeta(){return phReq("meta","readonly",function(s){return s.getAll()})}
+function phCfg(){try{var c=JSON.parse(localStorage.getItem(PH_CFG_KEY));if(c&&c.url)return c}catch(e){}return{url:"",key:""}}
+function phDels(){try{return JSON.parse(localStorage.getItem(PH_DEL_KEY))||[]}catch(e){return[]}}
+function phSetDels(a){localStorage.setItem(PH_DEL_KEY,JSON.stringify(a))}
+function phQueueDel(id){var d=phDels();if(d.indexOf(id)===-1){d.push(id);phSetDels(d)}}
+function phB64(blob){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(String(r.result).split(",")[1]||"")};r.onerror=function(){rej(r.error)};r.readAsDataURL(blob)})}
+function phFromB64(b64,mime){var bin=atob(b64),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:mime||"image/jpeg"})}
+function phApi(body,cfg){
+  var c=cfg||phCfg();if(!c.url)return Promise.reject(new Error("Photo Sync is not connected"));
+  body.key=c.key||"";
+  var ctl=new AbortController(),t=setTimeout(function(){ctl.abort()},90000);
+  return fetch(c.url,{method:"POST",body:JSON.stringify(body),headers:{"Content-Type":"text/plain"},redirect:"follow",signal:ctl.signal})
+    .then(function(r){clearTimeout(t);return r.json()},function(e){clearTimeout(t);throw e})
+    .then(function(d){if(!d||!d.ok)throw new Error((d&&d.error)||"Unexpected response");return d});
+}
+function phNoteError(e){
+  PH.lastError=(e&&e.message)||String(e);console.warn("Photo sync:",PH.lastError);
+  if(!PH.errToasted){PH.errToasted=true;phToast("Photo sync failed. Photos are safe on this device.")}
+  phSyncStatus();
+}
+function phLoadImg(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){res({img:im,url:u})};im.onerror=function(){URL.revokeObjectURL(u);rej(new Error("this image format is not supported"))};im.src=u})}
+function phScale(img,max,q){
+  var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,s=Math.min(1,max/Math.max(w,h));
+  var c=document.createElement("canvas");c.width=Math.max(1,Math.round(w*s));c.height=Math.max(1,Math.round(h*s));
+  var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.imageSmoothingQuality="high";x.drawImage(img,0,0,c.width,c.height);
+  return new Promise(function(res,rej){c.toBlob(function(b){if(b)res({blob:b,w:c.width,h:c.height});else rej(new Error("could not encode image"))},"image/jpeg",q)});
+}
+function phProcess(file){
+  if(!file||!/^image\//.test(file.type||""))return Promise.reject(new Error("not an image"));
+  if(file.size>PH_MAX_INPUT)return Promise.reject(new Error("image is larger than 30 MB"));
+  return phLoadImg(file).then(function(r){
+    return Promise.all([phScale(r.img,PH_MAX_FULL,PH_Q_FULL),phScale(r.img,PH_MAX_THUMB,PH_Q_THUMB)]).then(function(o){
+      URL.revokeObjectURL(r.url);
+      var base=(file.name&&!/^image\.(png|jpe?g|gif|webp)$/i.test(file.name))?file.name.replace(/\.[a-z0-9]+$/i,""):"pasted-"+new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+      return{id:phNewId(),meta:{name:base.slice(0,100)+".jpg",mime:"image/jpeg",w:o[0].w,h:o[0].h,bytes:o[0].blob.size,created:new Date().toISOString()},full:o[0].blob,thumb:o[1].blob,url:URL.createObjectURL(o[1].blob),fullUrl:null};
+    },function(e){URL.revokeObjectURL(r.url);throw e});
+  });
+}
+function phAddFiles(files,target){
+  var all=Array.prototype.slice.call(files||[]);
+  var list=all.filter(function(f){return f&&/^image\//.test(f.type||"")});
+  if(!target)return Promise.resolve(0);
+  if(!list.length){if(all.length)phToast("Only image files can be attached");return Promise.resolve(0)}
+  PH.busy[target]=(PH.busy[target]||0)+list.length;phRefresh(target);
+  var added=0;
+  return list.reduce(function(p,f){return p.then(function(){
+    return phProcess(f).then(function(en){
+      added++;
+      if(phIsPending(target)){(PH.pending[target]=PH.pending[target]||[]).push(en);return}
+      return phCommit(en,target);
+    }).catch(function(e){phToast("Could not add photo: "+e.message)}).then(function(){PH.busy[target]=Math.max(0,(PH.busy[target]||1)-1);phRefresh(target)});
+  })},Promise.resolve()).then(function(){return added});
+}
+function phCommit(en,owner){
+  var m=en.meta;m.id=en.id;m.owner=owner;m.synced=false;
+  PH.meta[m.id]=m;PH.urls[m.id]=en.url;if(en.fullUrl)PH.full[m.id]=en.fullUrl;
+  phRefresh(owner);
+  return Promise.all([phPutBlob(m.id+":f",en.full),phPutBlob(m.id+":t",en.thumb)])
+    .then(function(){return phPutMeta(m)})
+    .then(function(){phUpload(m.id)})
+    .catch(function(e){phToast("Could not store photo: "+e.message)});
+}
+function phCommitPending(key,owner){var arr=PH.pending[key]||[];PH.pending[key]=[];arr.forEach(function(en){phCommit(en,owner)});phRefresh(key);return arr.length}
+function phRevokeEntry(en){URL.revokeObjectURL(en.url);if(en.fullUrl)URL.revokeObjectURL(en.fullUrl)}
+function phDiscardPending(key){(PH.pending[key]||[]).forEach(phRevokeEntry);PH.pending[key]=[];phRefresh(key)}
+function phList(owner){
+  owner=String(owner||"");
+  if(phIsPending(owner))return(PH.pending[owner]||[]).map(function(en){return{id:en.id,pending:true,entry:en,name:en.meta.name,w:en.meta.w,h:en.meta.h,created:en.meta.created}});
+  return Object.keys(PH.meta).map(function(k){return PH.meta[k]}).filter(function(m){return m.owner===owner}).sort(function(a,b){return String(a.created).localeCompare(String(b.created))});
+}
+function phDropLocal(id){
+  delete PH.meta[id];
+  if(PH.urls[id]){URL.revokeObjectURL(PH.urls[id]);delete PH.urls[id]}
+  if(PH.full[id]){URL.revokeObjectURL(PH.full[id]);delete PH.full[id]}
+  phDelMeta(id).catch(phNoop);phDelBlob(id+":f").catch(phNoop);phDelBlob(id+":t").catch(phNoop);
+}
+function phRemove(owner,id){
+  if(phIsPending(owner)){
+    var arr=PH.pending[owner]||[];var i=arr.findIndex(function(e){return e.id===id});
+    if(i>-1){phRevokeEntry(arr[i]);arr.splice(i,1)}
+    phRefresh(owner);return;
+  }
+  var m=PH.meta[id];if(!m)return;
+  var wasSynced=!!m.synced;
+  phDropLocal(id);
+  if(wasSynced){phQueueDel(id);phFlushDels()}
+  phRefresh(owner);phSyncStatus();
+}
+function phCleanMeta(m){return{id:m.id,owner:m.owner,name:m.name,mime:m.mime||"image/jpeg",w:m.w||0,h:m.h||0,bytes:m.bytes||0,created:m.created}}
+function phUpload(id){
+  PH.chain=PH.chain.then(function(){
+    var m=PH.meta[id];if(!m||m.synced||!phCfg().url)return;
+    return Promise.all([phGetBlob(id+":f"),phGetBlob(id+":t")]).then(function(b){
+      if(!b[0])throw new Error("local photo file is missing");
+      return Promise.all([phB64(b[0]),b[1]?phB64(b[1]):Promise.resolve("")]);
+    }).then(function(d){return phApi({action:"upload",meta:phCleanMeta(m),full:d[0],thumb:d[1]})})
+    .then(function(){
+      var cur=PH.meta[id];
+      if(cur){cur.synced=true;phPutMeta(cur).catch(phNoop);phRefresh(cur.owner)}
+      else{phQueueDel(id);phFlushDels()}
+      PH.lastError="";PH.errToasted=false;phSyncStatus();
+    }).catch(phNoteError);
+  });
+  return PH.chain;
+}
+function phFlushDels(){
+  if(!phCfg().url||!phDels().length)return PH.chain;
+  PH.chain=PH.chain.then(function(){
+    return phDels().reduce(function(p,id){return p.then(function(){
+      return phApi({action:"delete",id:id}).then(function(){phSetDels(phDels().filter(function(x){return x!==id}))});
+    })},Promise.resolve()).catch(phNoteError);
+  });
+  return PH.chain;
+}
+function phMergeRemote(list){
+  var remote={},dels=phDels(),changed=false;
+  list.forEach(function(m){if(m&&m.id)remote[m.id]=m});
+  Object.keys(remote).forEach(function(id){
+    if(dels.indexOf(id)!==-1)return;
+    var l=PH.meta[id];
+    if(!l){var m=remote[id];m.synced=true;PH.meta[id]=m;phPutMeta(m).catch(phNoop);changed=true}
+    else if(!l.synced){l.synced=true;phPutMeta(l).catch(phNoop);changed=true}
+  });
+  Object.keys(PH.meta).forEach(function(id){if(PH.meta[id].synced&&!remote[id]){phDropLocal(id);changed=true}});
+  if(changed)phRefreshAll();
+}
+function phSyncAll(){
+  if(!phCfg().url)return Promise.resolve(false);
+  if(PH.syncing)return PH.syncing;
+  PH.syncing=phFlushDels().then(function(){return phApi({action:"list"})}).then(function(d){
+    phMergeRemote(d.photos||[]);
+    Object.keys(PH.meta).forEach(function(id){if(!PH.meta[id].synced)phUpload(id)});
+    return PH.chain;
+  }).then(function(){PH.lastSync=new Date();PH.syncing=null;phSyncStatus();return true},function(e){PH.syncing=null;phNoteError(e);return false});
+  return PH.syncing;
+}
+function phFetchRemote(id,variant){
+  return phApi({action:"get",id:id,variant:variant}).then(function(d){var b=phFromB64(d.data,d.mime);phPutBlob(id+(variant==="thumb"?":t":":f"),b).catch(phNoop);return b});
+}
+function phThumbUrl(id){
+  if(PH.urls[id])return Promise.resolve(PH.urls[id]);
+  if(PH.loading[id])return PH.loading[id];
+  var p=phGetBlob(id+":t").catch(function(){return null}).then(function(b){
+    if(b)return b;
+    var m=PH.meta[id];if(!m||!m.synced||!phCfg().url)return null;
+    return phFetchRemote(id,"thumb");
+  }).then(function(b){
+    delete PH.loading[id];
+    if(!b||!PH.meta[id])return"";
+    if(!PH.urls[id])PH.urls[id]=URL.createObjectURL(b);
+    return PH.urls[id];
+  },function(){delete PH.loading[id];return""});
+  PH.loading[id]=p;return p;
+}
+function phFullUrl(id){
+  if(PH.full[id])return Promise.resolve(PH.full[id]);
+  var k="f:"+id;if(PH.loading[k])return PH.loading[k];
+  var p=phGetBlob(id+":f").catch(function(){return null}).then(function(b){
+    if(b)return b;
+    var m=PH.meta[id];if(!m||!m.synced||!phCfg().url)return null;
+    return phFetchRemote(id,"full");
+  }).then(function(b){
+    delete PH.loading[k];
+    if(!b||!PH.meta[id])return"";
+    if(!PH.full[id])PH.full[id]=URL.createObjectURL(b);
+    return PH.full[id];
+  },function(){delete PH.loading[k];return""});
+  PH.loading[k]=p;return p;
+}
+function phHydrate(root){
+  (root||document).querySelectorAll("img[data-ph-id]:not([data-ph-h])").forEach(function(img){
+    img.setAttribute("data-ph-h","1");
+    var id=img.getAttribute("data-ph-id"),t=img.closest(".ph-thumb");
+    if(PH.urls[id]){img.src=PH.urls[id];return}
+    if(t)t.classList.add("loading");
+    phThumbUrl(id).then(function(u){if(t)t.classList.remove("loading");if(u)img.src=u;else if(t)t.classList.add("missing")});
+  });
+}
+function phThumbHtml(owner,p,mode){
+  var src=p.pending?p.entry.url:(PH.urls[p.id]||"");
+  var cls="ph-thumb"+(!p.pending&&!p.synced&&phCfg().url?" unsynced":"");
+  var nm=esc(p.name||"Photo");
+  var h='<div class="'+cls+'" data-ph-open="'+owner+'" data-ph-pid="'+p.id+'" role="button" tabindex="0" title="'+nm+(cls.indexOf("unsynced")>-1?" (waiting to sync)":"")+'">';
+  h+='<img alt="'+nm+'" data-ph-id="'+p.id+'"'+(src?' src="'+src+'" data-ph-h="1"':'')+' draggable="false">';
+  if(mode!=="ro")h+='<button type="button" class="ph-del" data-ph-del="'+owner+'" data-ph-pid="'+p.id+'" title="Remove photo" aria-label="Remove photo">&times;</button>';
+  return h+'</div>';
+}
+function phBarInner(owner,mode){
+  if(!owner)return"";
+  var h="";
+  phList(owner).forEach(function(p){h+=phThumbHtml(owner,p,mode)});
+  if(PH.busy[owner])h+='<div class="ph-thumb ph-busy" aria-label="Processing photo"><span class="ph-spin"></span></div>';
+  if(mode==="full"||!mode)h+='<button type="button" class="ph-add" data-ph-add="'+owner+'"><span class="ph-add-ic">&#128247;</span><span>Add photo</span></button><span class="ph-hint">or paste (Ctrl+V) or drop an image here</span>';
+  return h;
+}
+function phBarHtml(owner,mode,extra){
+  var n=phList(owner).length;
+  return'<div class="ph-bar ph-'+mode+(n||PH.busy[owner]?" has-photos":"")+(extra?" "+extra:"")+'" data-ph-target="'+owner+'" data-ph-mode="'+mode+'">'+phBarInner(owner,mode)+'</div>';
+}
+function phBadgeInner(owner){var n=phList(owner).length;return n?'<button type="button" class="ph-badge" data-ph-open="'+owner+'" title="View '+n+' photo'+(n>1?"s":"")+'" aria-label="View '+n+' photo'+(n>1?"s":"")+'">&#128247; '+n+'</button>':""}
+function phBadgeHtml(owner){return'<span class="ph-badge-slot" data-ph-badge="'+owner+'">'+phBadgeInner(owner)+'</span>'}
+function phRefresh(owner){
+  if(!owner)return;
+  var n=phList(owner).length;
+  document.querySelectorAll('.ph-bar[data-ph-target="'+owner+'"]').forEach(function(b){b.innerHTML=phBarInner(owner,b.getAttribute("data-ph-mode")||"full");b.classList.toggle("has-photos",n>0||!!PH.busy[owner])});
+  document.querySelectorAll('[data-ph-badge="'+owner+'"]').forEach(function(s){s.innerHTML=phBadgeInner(owner)});
+  if(PH.lb&&PH.lb.owner===owner)phLbSync();
+}
+function phRefreshAll(){
+  var seen={};
+  document.querySelectorAll(".ph-bar[data-ph-target],[data-ph-badge]").forEach(function(el){var o=el.getAttribute("data-ph-target")||el.getAttribute("data-ph-badge");if(o&&!seen[o]){seen[o]=1;phRefresh(o)}});
+  if(typeof getViewTab==="function"&&getViewTab()==="__wins__"&&typeof renderWins==="function")renderWins();
+}
+function phOpenLightbox(owner,pid){
+  var list=phList(owner);if(!list.length)return;
+  var idx=list.findIndex(function(p){return p.id===pid});
+  PH.lb={owner:owner,idx:idx<0?0:idx,token:0};
+  document.getElementById("phLightbox").classList.add("open");document.body.classList.add("ph-lb-open");
+  phLbShow();
+}
+function phCloseLightbox(){
+  PH.lb=null;var lb=document.getElementById("phLightbox");lb.classList.remove("open");document.body.classList.remove("ph-lb-open");
+  document.getElementById("phLbImg").removeAttribute("src");
+}
+function phLbSync(){var list=phList(PH.lb.owner);if(!list.length){phCloseLightbox();return}if(PH.lb.idx>=list.length)PH.lb.idx=list.length-1;phLbShow()}
+function phLbStep(d){if(!PH.lb)return;var n=phList(PH.lb.owner).length;if(n<2)return;PH.lb.idx=(PH.lb.idx+d+n)%n;phLbShow()}
+function phLbShow(){
+  var lb=PH.lb;if(!lb)return;
+  var list=phList(lb.owner),p=list[lb.idx];if(!p){phCloseLightbox();return}
+  var token=lb.token=Math.random();
+  var img=document.getElementById("phLbImg"),stage=document.getElementById("phLbStage"),dl=document.getElementById("phLbDl");
+  document.getElementById("phLbCount").textContent=(lb.idx+1)+" / "+list.length;
+  var d=p.created?new Date(p.created):null;
+  var state=p.pending?"Not saved yet":(phCfg().url?(p.synced?"Synced to Drive":"Waiting to sync"):"Saved on this device");
+  document.getElementById("phLbCap").textContent=[p.name||"Photo",d&&!isNaN(d)?d.toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"}):"",p.w&&p.h?p.w+" x "+p.h:"",state].filter(Boolean).join("  |  ");
+  document.getElementById("phLbPrev").hidden=list.length<2;document.getElementById("phLbNext").hidden=list.length<2;
+  img.alt=p.name||"Photo";dl.download=p.name||"photo.jpg";
+  stage.classList.remove("failed");
+  if(p.pending){
+    if(!p.entry.fullUrl)p.entry.fullUrl=URL.createObjectURL(p.entry.full);
+    img.src=p.entry.fullUrl;dl.href=p.entry.fullUrl;stage.classList.remove("loading");return;
+  }
+  stage.classList.add("loading");img.removeAttribute("src");dl.removeAttribute("href");
+  phThumbUrl(p.id).then(function(u){if(PH.lb&&PH.lb.token===token&&u&&!img.getAttribute("src"))img.src=u});
+  phFullUrl(p.id).then(function(u){
+    if(!PH.lb||PH.lb.token!==token)return;
+    stage.classList.remove("loading");
+    if(u){img.src=u;dl.href=u}else stage.classList.add("failed");
+  });
+}
+function phPasteTarget(t){
+  if(document.getElementById("photoSyncModal").classList.contains("open"))return null;
+  if(document.getElementById("doneModal").classList.contains("open"))return"pending:done";
+  if(document.getElementById("editModal").classList.contains("open")){var eid=document.getElementById("edit-id").value;return eid?"i:"+eid:null}
+  if(PH.lb)return PH.lb.owner;
+  if(document.getElementById("addForm").classList.contains("open"))return"pending:add";
+  if(t&&t.closest){
+    if(t.id&&t.id.indexOf("note-text-")===0)return"i:"+t.id.slice(10);
+    var nr=t.closest(".notes-row");if(nr&&nr.id)return"i:"+nr.id.slice(6);
+    var te=t.closest(".timeline-entry");if(te&&te.dataset.uid)return"u:"+te.dataset.uid;
+  }
+  if(typeof getViewTab==="function"&&getViewTab()==="__updates__")return"pending:upd";
+  return null;
+}
+function phOwnerLabel(o){
+  if(o==="pending:add")return"the new task";if(o==="pending:upd")return"the new update";if(o==="pending:done")return"the completion note";
+  return o.indexOf("u:")===0?"this update":"this task";
+}
+function phFilesFromClipboard(cd){
+  var files=[];
+  if(cd.files&&cd.files.length)files=Array.prototype.slice.call(cd.files);
+  else if(cd.items)Array.prototype.forEach.call(cd.items,function(it){if(it.kind==="file"){var f=it.getAsFile();if(f)files.push(f)}});
+  return files.filter(function(f){return/^image\//.test(f.type||"")});
+}
+document.addEventListener("paste",function(e){
+  var cd=e.clipboardData;if(!cd)return;
+  var files=phFilesFromClipboard(cd);if(!files.length)return;
+  var t=e.target,tn=t&&t.tagName;
+  var hasText=!!(cd.getData&&cd.getData("text/plain"));
+  if(hasText&&(tn==="INPUT"||tn==="TEXTAREA"))return;
+  var target=phPasteTarget(t);
+  if(!target){phToast("Open a task, its notes, or the Updates tab to paste a photo");return}
+  e.preventDefault();
+  phAddFiles(files,target).then(function(n){if(n)phToast(n+" photo"+(n>1?"s":"")+" added to "+phOwnerLabel(target))});
+});
+function phHasFiles(e){return!!(e.dataTransfer&&Array.prototype.indexOf.call(e.dataTransfer.types||[],"Files")!==-1)}
+function phDropBar(t){
+  if(!t||!t.closest)return null;
+  var b=t.closest(".ph-bar:not(.ph-ro)");if(b&&b.getAttribute("data-ph-target"))return b;
+  var z=t.closest("[data-ph-zone],.notes-row,.timeline-entry");
+  if(z){b=z.querySelector(".ph-bar:not(.ph-ro)");if(b&&b.getAttribute("data-ph-target"))return b}
+  return null;
+}
+var phDragBar=null;
+function phClearDrag(){if(phDragBar){phDragBar.classList.remove("ph-drag");phDragBar=null}}
+document.addEventListener("dragover",function(e){
+  if(!phHasFiles(e))return;
+  e.preventDefault();
+  var b=phDropBar(e.target);
+  e.dataTransfer.dropEffect=b?"copy":"none";
+  if(b!==phDragBar){phClearDrag();if(b){b.classList.add("ph-drag");phDragBar=b}}
+});
+document.addEventListener("dragleave",function(e){if(phHasFiles(e)&&!e.relatedTarget)phClearDrag()});
+document.addEventListener("drop",function(e){
+  if(!phHasFiles(e))return;
+  e.preventDefault();
+  var b=phDropBar(e.target);phClearDrag();
+  if(!b){phToast("Drop photos on a photo area (task form, notes, or update)");return}
+  phAddFiles(e.dataTransfer.files,b.getAttribute("data-ph-target"));
+});
+document.addEventListener("click",function(e){
+  var t=e.target;if(!t||!t.closest)return;
+  var del=t.closest("[data-ph-del]");
+  if(del){
+    e.preventDefault();e.stopPropagation();
+    var o=del.getAttribute("data-ph-del");
+    if(phIsPending(o)||confirm("Remove this photo?"))phRemove(o,del.getAttribute("data-ph-pid"));
+    return;
+  }
+  var add=t.closest("[data-ph-add]");
+  if(add){e.preventDefault();e.stopPropagation();PH.fileTarget=add.getAttribute("data-ph-add");var fi=document.getElementById("phFileInput");fi.value="";fi.click();return}
+  var op=t.closest("[data-ph-open]");
+  if(op){e.preventDefault();e.stopPropagation();phOpenLightbox(op.getAttribute("data-ph-open"),op.getAttribute("data-ph-pid"))}
+},true);
+document.addEventListener("keydown",function(e){
+  var t=e.target;
+  if(PH.lb){
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();phCloseLightbox();return}
+    if(e.key==="ArrowLeft"){e.preventDefault();e.stopPropagation();phLbStep(-1);return}
+    if(e.key==="ArrowRight"){e.preventDefault();e.stopPropagation();phLbStep(1);return}
+    if((e.ctrlKey||e.metaKey)&&/^[zy]$/i.test(e.key||"")){e.stopPropagation();return}
+  }
+  if((e.key==="Enter"||e.key===" ")&&t&&t.classList&&t.classList.contains("ph-thumb")&&t.hasAttribute("data-ph-open")){e.preventDefault();phOpenLightbox(t.getAttribute("data-ph-open"),t.getAttribute("data-ph-pid"));return}
+  if(document.getElementById("doneModal").classList.contains("open")){
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();closeDoneModal();return}
+    if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();e.stopPropagation();confirmDone();return}
+  }
+  if(e.key==="Escape"&&document.getElementById("photoSyncModal").classList.contains("open")){e.preventDefault();e.stopPropagation();closePhotoSync()}
+},true);
+document.getElementById("phFileInput").addEventListener("change",function(){
+  var tgt=PH.fileTarget;PH.fileTarget=null;
+  if(this.files&&this.files.length&&tgt)phAddFiles(this.files,tgt);
+});
+document.getElementById("phLbClose").addEventListener("click",phCloseLightbox);
+document.getElementById("phLbPrev").addEventListener("click",function(e){e.stopPropagation();phLbStep(-1)});
+document.getElementById("phLbNext").addEventListener("click",function(e){e.stopPropagation();phLbStep(1)});
+document.getElementById("phLbDel").addEventListener("click",function(){
+  if(!PH.lb)return;var p=phList(PH.lb.owner)[PH.lb.idx];if(!p)return;
+  if(p.pending||confirm("Delete this photo? This also removes it from Drive."))phRemove(PH.lb.owner,p.id);
+});
+document.getElementById("phLbDl").addEventListener("click",function(e){if(!this.getAttribute("href")||this.getAttribute("href")==="#")e.preventDefault()});
+document.getElementById("phLbStage").addEventListener("click",function(e){if(e.target===this)phCloseLightbox()});
+(function(){
+  var sx=0,sy=0,st=document.getElementById("phLbStage");
+  st.addEventListener("touchstart",function(e){if(e.touches.length===1){sx=e.touches[0].clientX;sy=e.touches[0].clientY}},{passive:true});
+  st.addEventListener("touchend",function(e){var t=e.changedTouches[0];if(!t)return;var dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)phLbStep(dx<0?1:-1);else if(dy>90&&Math.abs(dy)>Math.abs(dx)*1.5)phCloseLightbox()},{passive:true});
+})();
+var phHydrateQueued=false;
+new MutationObserver(function(){if(phHydrateQueued)return;phHydrateQueued=true;requestAnimationFrame(function(){phHydrateQueued=false;phHydrate()})}).observe(document.body,{childList:true,subtree:true});
+function phSyncStatus(){
+  var el=document.getElementById("ps-status");if(!el||!document.getElementById("photoSyncModal").classList.contains("open"))return;
+  var ids=Object.keys(PH.meta),waiting=ids.filter(function(id){return!PH.meta[id].synced}).length,c=phCfg();
+  var h='<div><b>'+ids.length+'</b> photo'+(ids.length===1?"":"s")+' on this device</div>';
+  if(!c.url)h+='<div class="warn">Not connected. Photos are stored only in this browser.</div>';
+  else{
+    h+='<div>'+(waiting?'<span class="warn">'+waiting+' waiting to upload</span>':'<span class="ok">All photos backed up to Drive</span>')+'</div>';
+    if(phDels().length)h+='<div class="warn">'+phDels().length+' deletion'+(phDels().length>1?"s":"")+' waiting to reach Drive</div>';
+    h+='<div>Last sync: '+(PH.syncing?"syncing now...":PH.lastSync?PH.lastSync.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}):"not yet this session")+'</div>';
+  }
+  if(PH.lastError)h+='<div class="err">Last error: '+esc(PH.lastError)+'</div>';
+  el.innerHTML=h;
+}
+function openPhotoSync(){
+  var c=phCfg();document.getElementById("ps-url").value=c.url||"";document.getElementById("ps-key").value=c.key||"";
+  document.getElementById("overflowDropdown").classList.remove("open");
+  document.getElementById("photoSyncModal").classList.add("open");phSyncStatus();
+}
+function closePhotoSync(){document.getElementById("photoSyncModal").classList.remove("open")}
+function phFormCfg(){return{url:document.getElementById("ps-url").value.trim(),key:document.getElementById("ps-key").value}}
+function phValidUrl(u){return/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(u)}
+document.getElementById("photoSyncBtn").addEventListener("click",openPhotoSync);
+document.getElementById("ps-close").addEventListener("click",closePhotoSync);
+document.getElementById("photoSyncModal").addEventListener("click",function(e){if(e.target===this)closePhotoSync()});
+document.getElementById("ps-test").addEventListener("click",function(){
+  var c=phFormCfg(),el=document.getElementById("ps-status");
+  if(!phValidUrl(c.url)){el.innerHTML='<div class="err">Enter the Apps Script web app URL (https://script.google.com/macros/s/.../exec).</div>';return}
+  el.innerHTML='<div>Testing connection...</div>';
+  phApi({action:"ping"},c).then(function(d){el.innerHTML='<div class="ok">Connected. '+(+d.count||0)+' photo'+(+d.count===1?"":"s")+' in Drive.</div>'},function(e){el.innerHTML='<div class="err">Connection failed: '+esc(e.message)+'</div>'});
+});
+document.getElementById("ps-save").addEventListener("click",function(){
+  var c=phFormCfg(),el=document.getElementById("ps-status");
+  if(!phValidUrl(c.url)){el.innerHTML='<div class="err">Enter the Apps Script web app URL (https://script.google.com/macros/s/.../exec).</div>';return}
+  if(!c.key){el.innerHTML='<div class="err">Enter the access key.</div>';return}
+  localStorage.setItem(PH_CFG_KEY,JSON.stringify(c));PH.lastError="";PH.errToasted=false;
+  el.innerHTML='<div>Syncing...</div>';
+  phSyncAll().then(function(ok){phSyncStatus();phRefreshAll();if(ok)phToast("Photo Sync connected")});
+});
+document.getElementById("ps-disconnect").addEventListener("click",function(){
+  if(!phCfg().url){closePhotoSync();return}
+  if(!confirm("Disconnect Photo Sync on this device? Photos stay on this device and in Drive."))return;
+  localStorage.removeItem(PH_CFG_KEY);phRefreshAll();openPhotoSync();
+});
+function phOwnerAlive(o){
+  var n=+String(o).slice(2);
+  if(String(o).indexOf("i:")===0)return items.some(function(i){return i.id===n});
+  if(String(o).indexOf("u:")===0)return updates.some(function(u){return u.id===n});
+  return false;
+}
+function phGcOrphans(){
+  if(!PH.cloudLoaded||typeof items==="undefined"||typeof updates==="undefined")return;
+  var now=Date.now(),lim=PH_ORPHAN_DAYS*864e5;
+  Object.keys(PH.meta).forEach(function(id){
+    var m=PH.meta[id];if(!m)return;
+    if(phOwnerAlive(m.owner)){if(m.orphanSince){delete m.orphanSince;phPutMeta(m).catch(phNoop)}return}
+    if(!m.orphanSince){m.orphanSince=now;phPutMeta(m).catch(phNoop);return}
+    if(now-m.orphanSince>lim)phRemove(m.owner,id);
+  });
+}
+var DONE={id:null};
+function openDoneModal(id){
+  var item=items.find(function(i){return i.id===id});if(!item||item.progress==="done")return;
+  DONE.id=id;phDiscardPending("pending:done");
+  document.getElementById("dm-task").textContent=item.task;
+  document.getElementById("dm-proj").textContent=item.project||"";
+  var subs=typeof getSubtasksForItem==="function"?getSubtasksForItem(id):[];
+  var pend=subs.filter(function(s){return s.progress!=="done"}).length;
+  var w=document.getElementById("dm-warn");
+  w.textContent=pend?pend+" sub-task"+(pend>1?"s are":" is")+" not done yet. They stay as they are.":"";
+  w.style.display=pend?"":"none";
+  var c=document.getElementById("dm-comment");c.value="";
+  document.getElementById("doneModal").classList.add("open");
+  setTimeout(function(){c.focus()},60);
+}
+function closeDoneModal(){document.getElementById("doneModal").classList.remove("open");phDiscardPending("pending:done");DONE.id=null}
+function confirmDone(){
+  var id=DONE.id,item=items.find(function(i){return i.id===id});
+  if(!item||item.progress==="done"){closeDoneModal();return}
+  if(PH.busy["pending:done"]){phToast("Still processing a photo, one moment...");return}
+  var comment=document.getElementById("dm-comment").value.trim();
+  pushUndo();
+  var oldProgress=item.progress;
+  item.progress="done";item.completedAt=new Date().toISOString();item.blockReason="";item.doneNote=comment;
+  logActivity(item.id,item.task,item.project,oldProgress,"done");
+  var u=logDoneToUpdates(item,comment);
+  item.doneUpdateId=u.id;
+  phCommitPending("pending:done","u:"+u.id);
+  document.getElementById("doneModal").classList.remove("open");DONE.id=null;
+  saveItems();refreshView();
+  showUndoToast("Marked done"+(comment?" with comment":"")+". Ctrl+Z to undo");
+}
+document.getElementById("dm-cancel").addEventListener("click",closeDoneModal);
+document.getElementById("dm-confirm").addEventListener("click",confirmDone);
+document.getElementById("doneModal").addEventListener("click",function(e){if(e.target===this)closeDoneModal()});
+window.addEventListener("online",function(){phSyncAll()});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&(!PH.lastSync||Date.now()-PH.lastSync>60000))phSyncAll()});
+phAllMeta().then(function(list){
+  (list||[]).forEach(function(m){if(m&&m.id&&!PH.meta[m.id])PH.meta[m.id]=m});
+  phRefreshAll();
+  setTimeout(phSyncAll,1500);
+  setTimeout(phGcOrphans,25000);
+}).catch(function(e){console.warn("Photo storage unavailable:",e)});
+</script>
 <script>
 function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 function safeParseJSON(str,fallback){try{return JSON.parse(str)}catch(e){return fallback}}
@@ -924,7 +1551,7 @@ function renderKanban(){
       html+='<div class="mc-actions">'+actGroupHtml(i)+'</div>';
       html+='<div class="kc-project"><span class="project-badge">'+esc(i.project)+'</span></div>';
       html+='<div class="kc-task">'+esc(i.task)+'</div>';
-      html+='<div class="kc-meta"><span class="kc-due '+dueClass+'" title="'+(i.dueDate||"")+'">'+dueText+'</span>'+getSubtaskCountHtml(i.id)+'</div>';
+      html+='<div class="kc-meta"><span class="kc-due '+dueClass+'" title="'+(i.dueDate||"")+'">'+dueText+'</span>'+getSubtaskCountHtml(i.id)+phBadgeHtml("i:"+i.id)+'</div>';
       if(expandedSubtasks[i.id]&&getSubtasksForItem(i.id).length)html+=subChecklistHtml(i,"board");
       html+='</div>';
     });
@@ -1121,9 +1748,11 @@ function quadrantToProps(q){
   var priority=isImportant?"High":(q==="q4"?"Low":"Med");
   return{priority:priority,urgent:isUrgent};
 }
-function logDoneToUpdates(item){
-  updates.push({id:uniqueId(),project:item.project,date:new Date().toISOString().split("T")[0],text:"\u2705 Completed: "+item.task,type:"auto-done"});
+function logDoneToUpdates(item,comment){
+  var u={id:uniqueId(),project:item.project,date:new Date().toISOString().split("T")[0],text:"\u2705 Completed: "+item.task+(comment?"\n"+comment:""),type:"auto-done"};
+  updates.push(u);
   saveUpdates();
+  return u;
 }
 function getTaskQuadrant(item){
   var dominated=item.priority==="High";
@@ -1171,7 +1800,7 @@ function renderMatrix(){
         html+='<div class="mc-actions">'+actGroupHtml(i)+'</div>';
         html+='<div class="mc-project"><span class="project-badge">'+esc(i.project)+'</span></div>';
         html+='<div class="mc-task">'+esc(i.task)+'</div>';
-        html+='<div class="mc-meta"><span class="mc-due '+dueClass+'" title="'+(i.dueDate||"")+'">'+dueText+'</span>'+getSubtaskCountHtml(i.id)+'</div>';
+        html+='<div class="mc-meta"><span class="mc-due '+dueClass+'" title="'+(i.dueDate||"")+'">'+dueText+'</span>'+getSubtaskCountHtml(i.id)+phBadgeHtml("i:"+i.id)+'</div>';
         html+='<div class="mc-status"><span class="mc-progress-badge mc-prog-'+i.progress+'" data-cyc="'+i.id+'"'+blockTitle+'>'+progLabel+'</span></div>';
         if(i.progress==="blocked"){html+='<input class="mc-block-input" data-block-id="'+i.id+'" placeholder="Block reason..." value="'+esc(i.blockReason||"").replace(/"/g,"&quot;")+'">';}
         if(expandedSubtasks[i.id]&&getSubtasksForItem(i.id).length)html+=subChecklistHtml(i,"matrix");
@@ -1284,15 +1913,7 @@ function matrixCycleProgress(id){
   saveItems();renderMatrix();
   if(item.progress==="blocked")setTimeout(function(){var el=document.querySelector('.mc-block-input[data-block-id="'+id+'"]');if(el)el.focus()},100);
 }
-function matrixMarkDone(id){
-  var item=items.find(function(i){return i.id===id});if(!item)return;
-  pushUndo();
-  var oldProgress=item.progress;
-  item.progress="done";item.completedAt=new Date().toISOString();item.blockReason="";
-  logActivity(item.id,item.task,item.project,oldProgress,"done");
-  logDoneToUpdates(item);
-  saveItems();refreshView();
-}
+function matrixMarkDone(id){openDoneModal(id)}
 function initMatrixTouch(){
   var container=document.getElementById("matrixContainer");
   if(!container)return;
@@ -1672,10 +2293,15 @@ function addUpdate(){
   var proj=document.getElementById("upd-project").value;
   var date=document.getElementById("upd-date").value;
   var text=document.getElementById("upd-text").value.trim();
-  if(!text){alert("Update text is required");return}
+  var nPh=(PH.pending["pending:upd"]||[]).length;
+  if(PH.busy["pending:upd"]){phToast("Still processing a photo, one moment...");return}
+  if(!text&&!nPh){alert("Update text is required");return}
+  if(!text)text="\uD83D\uDCF7 Photo update";
   if(!date)date=new Date().toISOString().split("T")[0];
   pushUndo();
-  updates.push({id:uniqueId(),project:proj,date:date,text:text});
+  var newU={id:uniqueId(),project:proj,date:date,text:text};
+  updates.push(newU);
+  phCommitPending("pending:upd","u:"+newU.id);
   saveUpdates();
   document.getElementById("upd-text").value="";
   renderUpdates();
@@ -1756,9 +2382,10 @@ function renderUpdates(){
       if(curr)html+='<span class="wh-current">This Week</span>';
       html+='<span class="wd-count">'+weeks[wk].length+' update'+(weeks[wk].length>1?"s":"")+'</span></div>';
       weeks[wk].forEach(function(u){
-        var escapedText=esc(u.text).replace(/\n/g,"<br>");
+        var txt=String(u.text||""),nl=txt.indexOf("\n");
+        var escapedText=(u.type==="auto-done"&&nl>-1)?esc(txt.slice(0,nl))+'<div class="done-comment">'+esc(txt.slice(nl+1)).replace(/\n/g,"<br>")+'</div>':esc(txt).replace(/\n/g,"<br>");
         var autoCls=u.type==="auto-done"?" auto-done":"";
-        html+='<div class="timeline-entry'+autoCls+'" data-uid="'+u.id+'"><div class="entry-date" onclick="editUpdateDate('+u.id+',this)">'+u.date+'<div style="font-size:.65rem;color:var(--c-purple);margin-top:2px" onclick="event.stopPropagation();editUpdateProject('+u.id+',this)">'+esc(u.project)+'</div></div><div class="entry-text" onclick="editUpdateText('+u.id+',this)">'+escapedText+'</div><button class="entry-delete" onclick="deleteUpdate('+u.id+')" title="Delete">&times;</button></div>';
+        html+='<div class="timeline-entry'+autoCls+'" data-uid="'+u.id+'"><div class="entry-date" onclick="editUpdateDate('+u.id+',this)">'+u.date+'<div style="font-size:.65rem;color:var(--c-purple);margin-top:2px" onclick="event.stopPropagation();editUpdateProject('+u.id+',this)">'+esc(u.project)+'</div></div><div class="entry-main"><div class="entry-text" onclick="editUpdateText('+u.id+',this)">'+escapedText+'</div>'+phBarHtml("u:"+u.id,"list")+'</div><div class="entry-actions"><button type="button" class="entry-attach" data-ph-add="u:'+u.id+'" title="Attach photo (or paste while editing)" aria-label="Attach photo">&#128206;</button><button class="entry-delete" onclick="deleteUpdate('+u.id+')" title="Delete">&times;</button></div></div>';
       });
     });
   }
@@ -1830,7 +2457,13 @@ function renderWins(){
         html+='<span class="win-added">Added '+addedStr+'</span>';
         html+='<span>Done '+doneStr+'</span>';
         if(dur)html+='<span class="win-duration">'+dur+'</span>';
-        html+='</div></div></div>';
+        html+='</div>';
+        var du=i.doneUpdateId?updates.find(function(x){return x.id===i.doneUpdateId}):null;
+        var wnote=i.doneNote||(du&&du.text&&du.text.indexOf("\n")>-1?du.text.slice(du.text.indexOf("\n")+1):"");
+        if(wnote)html+='<div class="win-note">&#128172; '+esc(wnote)+'</div>';
+        if(i.doneUpdateId)html+=phBarHtml("u:"+i.doneUpdateId,"ro");
+        html+=phBarHtml("i:"+i.id,"ro");
+        html+='</div></div>';
       });
       html+='</div>';
     });
@@ -1920,31 +2553,27 @@ function getDueClass(item){
   if(diff<0)return"due-overdue";if(diff<=3)return"due-warning";return"";
 }
 function cycleProgress(id){
-  pushUndo();
   var item=items.find(function(i){return i.id===id});if(!item)return;
-  var oldProgress=item.progress;
   var idx=STAGES.indexOf(item.progress);
-  item.progress=STAGES[(idx+1)%STAGES.length];
-  if(item.progress==="done"){item.completedAt=new Date().toISOString()}else{item.completedAt=null}
+  var next=STAGES[(idx+1)%STAGES.length];
+  if(next==="done"){openDoneModal(id);return}
+  pushUndo();
+  var oldProgress=item.progress;
+  item.progress=next;
+  item.completedAt=null;
+  if(oldProgress==="done")item.doneNote="";
   if(item.progress!=="blocked")item.blockReason="";
   logActivity(item.id,item.task,item.project,oldProgress,item.progress);
-  if(item.progress==="done")logDoneToUpdates(item);
   saveItems();refreshView();
   if(item.progress==="blocked")setTimeout(function(){var el=document.getElementById("block-input-"+id);if(el)el.focus()},100);
 }
 function toggleItem(id){
-  pushUndo();
   var item=items.find(function(i){return i.id===id});if(!item)return;
+  if(item.progress!=="done"){openDoneModal(id);return}
+  pushUndo();
   var oldProgress=item.progress;
-  if(item.progress==="done"){item.progress="in-progress";item.completedAt=null}
-  else{
-    var subs=getSubtasksForItem(id);
-    var pending=subs.filter(function(s){return s.progress!=="done"});
-    if(pending.length>0&&!confirm(pending.length+" sub-task(s) not done. Mark parent as Done anyway?"))return;
-    item.progress="done";item.completedAt=new Date().toISOString();
-  }
+  item.progress="in-progress";item.completedAt=null;item.doneNote="";
   logActivity(item.id,item.task,item.project,oldProgress,item.progress);
-  if(item.progress==="done")logDoneToUpdates(item);
   item.blockReason="";saveItems();refreshView();
 }
 function deleteItem(id){
@@ -1968,6 +2597,7 @@ function editItem(id){
   document.querySelectorAll("#edit-quadrant .qp-btn").forEach(function(b){b.classList.toggle("active",b.dataset.q===editQ)});
   var sel=document.getElementById("edit-project");sel.innerHTML="";
   projects.forEach(function(p){var o=document.createElement("option");o.value=p;o.textContent=p;if(p===item.project)o.selected=true;sel.appendChild(o)});
+  var eb=document.getElementById("edit-photos");eb.setAttribute("data-ph-target","i:"+id);eb.innerHTML=phBarInner("i:"+id,"full");
   document.getElementById("editModal").classList.add("open");
 }
 function getBlockHtml(item){
@@ -1997,7 +2627,7 @@ function render(){
     h+='<td>'+(idx+1)+'</td>';
     h+='<td><span class="project-badge">'+esc(i.project)+'</span></td>';
     h+='<td class="task-cell"><span class="priority '+pClass+'"></span><span class="task-text">'+esc(i.task)+'</span>';
-    h+=getSubtaskCountHtml(i.id);
+    h+=getSubtaskCountHtml(i.id)+phBadgeHtml("i:"+i.id);
     h+='<div class="progress-container" onclick="cycleProgress('+i.id+')" title="Click to cycle: Not Started > In Progress > Blocked > Done"><div class="progress-fill '+i.progress+'"></div></div>';
     h+='<div class="progress-label"><span class="stage '+i.progress+'">'+STAGE_LABELS[i.progress]+'</span></div>';
     h+=getBlockHtml(i)+ct+'</td>';
@@ -2006,7 +2636,7 @@ function render(){
     h+='<td><div class="row-actions"><button type="button" class="add-sub-btn" onclick="startAddSubtask('+i.id+',\'table\')" title="Add sub-task" aria-label="Add sub-task">+ Sub</button>'+actGroupHtml(i)+'</div></td>';
     h+='</tr>';
     if(stOpen)h+='<tr class="st-row" data-pid="'+i.id+'"><td class="st-gutter" colspan="3"></td><td class="st-cell" colspan="4">'+subChecklistHtml(i,"table")+'</td></tr>';
-    h+='<tr class="notes-row" id="notes-'+i.id+'"><td colspan="7"><textarea class="notes-textarea" id="note-text-'+i.id+'" placeholder="Add notes...">'+esc(i.notes||"")+'</textarea></td></tr>';
+    h+='<tr class="notes-row" id="notes-'+i.id+'"><td colspan="7"><textarea class="notes-textarea" id="note-text-'+i.id+'" placeholder="Add notes or paste a screenshot...">'+esc(i.notes||"")+'</textarea>'+phBarHtml("i:"+i.id,"full","ph-notes")+'</td></tr>';
   });
   tbody.innerHTML=h;
   console.log("[AI-TRACKER DEBUG] items:",items.length,"filtered:",filtered.length,"rows in h:",(h.match(/data-id=/g)||[]).length);
@@ -2042,6 +2672,7 @@ function renderMobileCards(filtered){
     mh+='<div class="mobile-card-meta">';
     mh+='<span class="'+dueClass+'" title="'+(i.dueDate||'')+'">Due: '+dueStr+'</span>';
     if(subs.length)mh+=getSubtaskCountHtml(i.id);
+    mh+=phBadgeHtml("i:"+i.id);
     if(i.source)mh+='<span>'+esc(i.source)+'</span>';
     mh+='</div>';
     mh+='<div class="mobile-card-progress">';
@@ -2098,6 +2729,7 @@ document.getElementById("addBtn").addEventListener("click",function(){if(documen
 document.getElementById("formBackdrop").addEventListener("click",closeAddForm);
 document.getElementById("submitBtn").addEventListener("click",function(){
   var task=document.getElementById("f-task").value.trim();if(!task){alert("Task is required");return}
+  if(PH.busy["pending:add"]){phToast("Still processing a photo, one moment...");return}
   pushUndo();
   var newId=uniqueId();var newProj=document.getElementById("f-project").value;
   var qSel=getSelectedQuadrant("f-quadrant");var qProps=quadrantToProps(qSel);
@@ -2106,6 +2738,7 @@ document.getElementById("submitBtn").addEventListener("click",function(){
   if(!userDue&&!qProps.urgent&&(qSel==="q2")){var wk=new Date();wk.setDate(wk.getDate()+7);userDue=wk.toISOString().split("T")[0]}
   items.push(migrateItem({id:newId,project:newProj,task:task,owner:"MB",dueDate:userDue,priority:qProps.priority,status:"Open",progress:"not-started",source:document.getElementById("f-source").value||"",notes:document.getElementById("f-notes").value||"",dateAdded:new Date().toISOString().split("T")[0],completedAt:null,blockReason:"",sortOrder:items.length}));
   logActivity(newId,task,newProj,"","created");
+  phCommitPending("pending:add","i:"+newId);
   saveItems();document.getElementById("f-task").value="";document.getElementById("f-due").value="";document.getElementById("f-source").value="";document.getElementById("f-notes").value="";document.getElementById("addForm").classList.remove("open");document.getElementById("formBackdrop").classList.remove("open");
   document.querySelectorAll("#f-quadrant .qp-btn").forEach(function(b){b.classList.toggle("active",b.dataset.q==="q1")});
   refreshView();
@@ -2253,6 +2886,7 @@ function loadFromCloud() {
         localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
         changed = true;
       }
+      PH.cloudLoaded = true;
       if (changed) { renderProjectTabs(); populateProjectDropdown(); refreshView(); }
       console.log("Loaded from cloud");
     })
@@ -2400,7 +3034,7 @@ render();
 
 // What's New popup
 (function(){
-  var BUILD = "2026-10-20-v12";
+  var BUILD = "2026-10-21-v13";
   var SEEN_KEY = "ai_tracker_whats_new_seen";
   if(localStorage.getItem(SEEN_KEY)===BUILD)return;
   var overlay=document.createElement("div");
@@ -2410,6 +3044,9 @@ render();
   box.innerHTML='<h2 style="margin:0 0 8px;color:var(--pop-title);font-size:1.2rem">&#127881; What\'s New</h2>'
     +'<p style="font-size:.75rem;color:var(--pop-sub);margin:0 0 16px">Build: '+BUILD+'</p>'
     +'<ul style="padding-left:18px;margin:0 0 20px;font-size:.85rem;line-height:1.8;color:var(--pop-text)">'
+    +'<li><b>Completion comments:</b> clicking &#10003; now opens a Mark as done dialog where you can add a comment (and photos). It is posted with the &#9989; Completed entry in the Updates tab and shown in the Completed tab</li>'
+    +'<li><b>Photos:</b> paste (Ctrl+V), drop, or upload images on new tasks, task notes, the Edit dialog, updates, and completion notes. Click a thumbnail to open the viewer (arrows to browse, download, delete)</li>'
+    +'<li><b>Photo Sync:</b> More menu &#8943; then Photo Sync connects a Google Drive backup so photos show on all your devices</li>'
     +'<li>All your projects now show as tabs; the More menu is gone</li>'
     +'<li>Cleaner layout: removed Owner, My AIs, Select, Manual Order and the archived toggle</li>'
     +'<li>Finished and archived items live in the Completed tab</li>'
