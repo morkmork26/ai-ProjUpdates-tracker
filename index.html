@@ -403,6 +403,9 @@ tr.st-row:hover td{background:transparent}
 .mc-compact .mc-project{margin-bottom:2px}
 .mc-compact .mc-project .project-badge{font-size:.58rem;padding:1px 5px}
 .mq-show-toggle{text-align:center;margin-top:4px}
+.matrix-card.has-subs{border-left:3px solid var(--st-accent,#58a6ff)}
+.mc-compact .mc-meta:has(.st-chip){display:flex}
+.matrix-card .st-list{margin-top:6px;padding-top:6px;border-top:1px dashed rgba(139,148,158,.35);cursor:default}
 .mq-show-toggle button{background:none;border:none;color:#58a6ff;font-size:.65rem;cursor:pointer;padding:2px 8px}
 .mq-show-toggle button:hover{text-decoration:underline}
 
@@ -1792,21 +1795,22 @@ function renderMatrix(){
     }else{
       var useCompact=buckets[qid].length>COMPACT_LIMIT&&!matrixExpanded[qid];
       buckets[qid].forEach(function(i,idx){
-        var compact=useCompact&&idx>=COMPACT_LIMIT;
+        var subN=getSubtasksForItem(i.id).length,subOpen=!!expandedSubtasks[i.id];
+        var compact=useCompact&&idx>=COMPACT_LIMIT&&!subOpen;
         var pDot=i.priority==="High"?"background:var(--c-red)":i.priority==="Low"?"background:var(--c-muted)":"background:var(--c-blocked)";
         var dueText=formatRelativeDate(i.dueDate);
         var dueClass=getDueClass(i);
         var progLabel=STAGE_LABELS[i.progress]||i.progress;
         var blockTitle=i.progress==="blocked"&&i.blockReason?' title="'+esc(i.blockReason).replace(/"/g,"&quot;")+'"':"";
-        html+='<div class="matrix-card'+(compact?" mc-compact":"")+'" draggable="true" data-id="'+i.id+'"'+' data-idx="'+idx+'">';
+        html+='<div class="matrix-card'+(compact?" mc-compact":"")+(subN?" has-subs":"")+'" draggable="true" data-id="'+i.id+'"'+' data-idx="'+idx+'">';
         html+='<div class="mc-priority" style="'+pDot+'"></div>';
-        html+='<div class="mc-actions">'+actGroupHtml(i)+'</div>';
+        html+='<div class="mc-actions"><button type="button" class="mc-act-btn mc-sub-btn" data-act="sub-add" data-id="'+i.id+'" data-ctx="matrix" title="Add sub-task" aria-label="Add sub-task">&#43;&#8801;</button>'+actGroupHtml(i)+'</div>';
         html+='<div class="mc-project"><span class="project-badge">'+esc(i.project)+'</span></div>';
         html+='<div class="mc-task">'+esc(i.task)+'</div>';
         html+='<div class="mc-meta"><span class="mc-due '+dueClass+'" title="'+(i.dueDate||"")+'">'+dueText+'</span>'+getSubtaskCountHtml(i.id)+phBadgeHtml("i:"+i.id)+'</div>';
         html+='<div class="mc-status"><span class="mc-progress-badge mc-prog-'+i.progress+'" data-cyc="'+i.id+'"'+blockTitle+'>'+progLabel+'</span></div>';
         if(i.progress==="blocked"){html+='<input class="mc-block-input" data-block-id="'+i.id+'" placeholder="Block reason..." value="'+esc(i.blockReason||"").replace(/"/g,"&quot;")+'">';}
-        if(expandedSubtasks[i.id]&&getSubtasksForItem(i.id).length)html+=subChecklistHtml(i,"matrix");
+        if(subOpen)html+=subChecklistHtml(i,"matrix");
         html+='</div>';
       });
       if(useCompact){
@@ -1843,6 +1847,7 @@ function renderMatrix(){
   var dragCardId=null;var dragStartQuad=null;
   document.querySelectorAll(".matrix-card").forEach(function(card){
     card.addEventListener("dragstart",function(e){
+      if(e.target!==card&&e.target.closest&&e.target.closest(".st-list")){e.preventDefault();return}
       dragCardId=+card.dataset.id;dragStartQuad=card.closest(".matrix-quadrant").dataset.quadrant;
       card.classList.add("dragging");
       e.dataTransfer.effectAllowed="move";
@@ -2218,6 +2223,11 @@ function handleActBtn(b){
   else if(a==="sub-status")cycleSubtaskProgress(sid);
   else if(a==="sub-edit")startSubEdit(sid,b.dataset.ctx);
   else if(a==="sub-del")deleteSubtask(sid);
+  else if(a==="sub-add")quickAddSub(id,b.dataset.ctx);
+}
+function quickAddSub(pid,ctx){
+  expandedSubtasks[pid]=true;saveSubOpen();subAddOpen={pid:pid,ctx:ctx};stRefresh();
+  setTimeout(function(){openSubAdd(pid,ctx)},0);
 }
 document.addEventListener("click",function(e){
   var b=e.target&&e.target.closest?e.target.closest(".mc-act-btn[data-act]"):null;
