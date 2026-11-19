@@ -1798,7 +1798,7 @@ function renderMatrix(){
         var dueClass=getDueClass(i);
         var progLabel=STAGE_LABELS[i.progress]||i.progress;
         var blockTitle=i.progress==="blocked"&&i.blockReason?' title="'+esc(i.blockReason).replace(/"/g,"&quot;")+'"':"";
-        html+='<div class="matrix-card'+(compact?" mc-compact":"")+'" draggable="true" data-id="'+i.id+'"'+(compact?' style="display:none"':"")+' data-idx="'+idx+'">';
+        html+='<div class="matrix-card'+(compact?" mc-compact":"")+'" draggable="true" data-id="'+i.id+'"'+' data-idx="'+idx+'">';
         html+='<div class="mc-priority" style="'+pDot+'"></div>';
         html+='<div class="mc-actions">'+actGroupHtml(i)+'</div>';
         html+='<div class="mc-project"><span class="project-badge">'+esc(i.project)+'</span></div>';
@@ -1811,7 +1811,7 @@ function renderMatrix(){
       });
       if(useCompact){
         var extra=buckets[qid].length-COMPACT_LIMIT;
-        html+='<div class="mq-show-toggle"><button data-expand="'+qid+'">Show '+extra+' more</button></div>';
+        html+='<div class="mq-show-toggle"><button data-expand="'+qid+'">Expand '+extra+' compact items</button></div>';
       }
       if(matrixExpanded[qid]&&buckets[qid].length>COMPACT_LIMIT){
         html+='<div class="mq-show-toggle"><button data-collapse="'+qid+'">Show less</button></div>';
